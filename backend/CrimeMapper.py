@@ -70,7 +70,7 @@ class CrimeMapper(object):
 		Plots the police precints and adds a marker of the address 
 		that was entered.
 		"""
-		pathgeo = "../data/Police_Precincts.geojson"
+		pathgeo = "./data/Police_Precincts.geojson"
 		self.geo_df['precinct'] = self.geo_df['precinct'].astype(int)
 		prec_index = self.geo_df[self.geo_df.precinct==self.prec].index
 		prec = self.geo_df['geometry'][prec_index[0]]
@@ -82,8 +82,8 @@ class CrimeMapper(object):
 		#self.coor = [self.location.latitude, self.location.longitude]
 		#folium.Marker(location=self.coor, popup=name).add_to(nyc_crime_map)   
 
-		if not os.path.exists("./frontend/maps"):
-			os.makedirs("./frontend/maps")
+		if not os.path.exists("./frontend/images/"):
+			os.makedirs("./frontend/images/")
 
 		cm = plt.get_cmap('RdBu')
 		num_colours = len(prec)
