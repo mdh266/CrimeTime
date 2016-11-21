@@ -57,7 +57,6 @@
 
     <div class="starter-template">
         <h2>New York City Address Not Found</h2>
-        <p>Please add a borough to your address if you did not include it</p>
     </div>
 
 
@@ -79,8 +78,21 @@
       <form  action="/output" method="GET">
         <div class="form-group">
           <label for="nyc_address">Enter A NYC Address:</label>
-          <input type="text" id="nyc_address" name='nyc_address' placeholder="">
+          <input type="text" id="nyc_address" name='nyc_address' placeholder="e.g. 45 W. 25th St.">
         </div>
+		 <div class="form-group">
+		<label for="borough"> Borough:</label>
+  	&nbsp;
+    <select name="borough" id="borough">
+    <option value="Manhattan">Manhattan</option>
+    <option value="Brooklyn">Brooklyn</option>
+    <option value="Queens">Queens</option>
+    <option value="Bronx">Bronx</option>
+    <option value="Staten Island">Staten Island</option>
+    </select>
+    &nbsp;    &nbsp;    &nbsp;
+		</div>
+
 
         <div>
           <button type="submit" class="btn btn-default btn-lg">Enter</button>
