@@ -4,7 +4,7 @@
 
 
 
-** Dependenices **
+**Dependenices**
 
 1.) Python 2
 2.) SQLite

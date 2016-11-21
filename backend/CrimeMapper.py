@@ -13,9 +13,17 @@ from geopy.distance import great_circle
 import geopandas as gpd 
 from shapely.geometry import Point
 
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
+import StringIO
+
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from mpl_toolkits.basemap import Basemap
+import base64
+
 from shapely.geometry import Point, MultiPoint, MultiPolygon
 from descartes import PolygonPatch
 
@@ -104,7 +112,7 @@ class CrimeMapper(object):
 		#title = 'New York City Police Precinct ' + str(self.prec)
 		#plt.title(title, fontsize=13)
 		plt.tight_layout()
-		plt.savefig("./frontend/images/map.png")#, alpha=True, dpi=300)
+		#plt.savefig("./frontend/images/map.png")#, alpha=True, dpi=300)
 
 		#if os.path.exists("./frontend/maps/map.html"):	
 		#	os.remove("./frontend/maps/map.html")
@@ -178,7 +186,7 @@ class CrimeMapper(object):
 		if not os.path.exists("./frontend/images"):
 			os.makedirs("./frontend/images")
             
-		plt.savefig("./frontend/images/Decomp.jpg")
+	#	plt.savefig("./frontend/images/Decomp.jpg")
             
 
 	def percent_per_day(self):
@@ -210,7 +218,7 @@ class CrimeMapper(object):
 		if not os.path.exists("./frontend/images"):
 			os.makedirs("./frontend/images")
  
-		plt.savefig("./frontend/images/Day.jpg")
+		#plt.savefig("./frontend/images/Day.jpg")
         
         
         
@@ -235,7 +243,7 @@ class CrimeMapper(object):
 		if not os.path.exists("./frontend/images"):
 			os.makedirs("./frontend/images")
 
-		plt.savefig("./frontend/images/Hour.jpg")
+		#plt.savefig("./frontend/images/Hour.jpg")
 
 	def get_precinct(self):
 		"""
