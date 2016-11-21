@@ -57,7 +57,9 @@ def crime_time_output():
 	## Crime type: Larceny, Robbery, Burglary, Assault
 	crime_type = str(request.args.get('crime_type'))
 	## The address entered by the user.
-	address = str(request.args.get('nyc_address'))
+	street = str(request.args.get('nyc_address'))
+	borough = str(request.args.get('borough'))
+	address = street + ' ' + borough
 
 	CT = CrimeMapper()
 	if CT.find_precinct(address) == False:

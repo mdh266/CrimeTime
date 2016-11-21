@@ -8,28 +8,29 @@ from dateutil.relativedelta import relativedelta
 import matplotlib.pyplot as plt
 
 import statsmodels.api as sm
+import pandas as pd
 
+import numpy as np
 
 class SARIMA_model:
     """
     This class builds a seasonal based ARIMA model for the suppied time seires
     """
-    start = datetime.strptime("2014-10-31", "%Y-%m-%d")
+    start = datetime.strptime("2015-1-31", "%Y-%m-%d")
     date_list = [start + relativedelta(months=x) for x in range(0,12)]
     
     start2 = datetime.strptime("2006-1-31", "%Y-%m-%d")
     date_list2 = [start2 + relativedelta(months=x) for x in range(0,120)]
     
-    
     def __init__(self, CT):
         """
-				CT is the CrimeMapper object.
+				input - CT is the CrimeMapper object.
         
         """
-				##
+				## Errors in the model 
         self.errors = []
 
-				## 
+				## The PQ values for the
         self.PDQ_Values = []
 
 				## The time series for the 
@@ -51,7 +52,7 @@ class SARIMA_model:
 
     def fit(self):
         """
-        
+        Fit the model to the data and tries to find the optimal p,q,P,Q values
         """
         for P in range(0,2):
             for Q in range(0,2):
@@ -153,7 +154,8 @@ class SARIMA_model:
         
     def plot(self):
         """
+				Plots the predicted and recorded crime values
         """
         self.pred_vs_record[['Predicted',
                              'Recorded']].plot(figsize=(8,4),linewidth=3)   
-
+        

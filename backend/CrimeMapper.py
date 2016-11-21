@@ -36,7 +36,8 @@ class CrimeMapper(object):
 		"""
 		## Police precinct geopandas dataframe
 		self.geo_df = gpd.read_file("./data/Police_Precincts.geojson")
-        
+		#self.geo_df = gpd.read_file("../data/Police_Precincts.geojson")
+
 	def find_precinct(self, address):
 		""" 
 		Takes in address and finds the police precint the address belongs to.
@@ -78,7 +79,8 @@ class CrimeMapper(object):
 		"""
 		sql_query = 'SELECT * FROM Crime_Data WHERE PRECINCT = '\
 								+ str(self.prec)
-
+	
+		#conn = sqlite3.connect('../data/CrimeTime.db')
 		conn = sqlite3.connect('./data/CrimeTime.db')
 
 		## The crime dataframe for the selected police precint.
@@ -143,7 +145,6 @@ class CrimeMapper(object):
 			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
     
 
-        
         
 	def percent_per_hour(self):
 		""" 
