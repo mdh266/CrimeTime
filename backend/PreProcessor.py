@@ -11,17 +11,29 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 class PreProcessor(object):
-    
-    address = "./data/NYPD_7_Major_Felony_Incident_Map.csv"
-    
-    headers = ['DATE','WEEKDAY','MONTH', 'DAY', 'YEAR','HOUR',
-                    'OFFENSE', 'CLASSIFICATION', 'PRECINCT', 
-                     'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
+		"""
+		Creates a SQLite database for crimes in New York City.  It will
+		read in the data from the CSV file, clean it and store it to disk.
+		"""
     
     def __init__(self):
-        """NOTHING FOR NOW"""
-        
+			"""
+			Constructor will just create address and column names.
+			"""
+
+			## The csv file of crime data downloaded from NYC Open Data
+    	self.address = "./data/NYPD_7_Major_Felony_Incident_Map.csv"
+    
+			## Column names for the database
+    	self.headers = ['DATE','WEEKDAY','MONTH', 'DAY', 'YEAR','HOUR',
+                    'OFFENSE', 'CLASSIFICATION', 'PRECINCT', 
+                     'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
+
+			
     def make_database(self, database_name):
+				"""
+				This function is does all the work.
+				"""
         crime_df = pd.read_csv(self.address,index_col=None)
         #crime_new_df = pd.DataFrame.copy(crime_df)
 

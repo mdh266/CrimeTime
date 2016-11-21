@@ -12,9 +12,8 @@ import statsmodels.api as sm
 
 class SARIMA_model:
     """
-    
+    This class builds a seasonal based ARIMA model for the suppied time seires
     """
-    
     start = datetime.strptime("2014-10-31", "%Y-%m-%d")
     date_list = [start + relativedelta(months=x) for x in range(0,12)]
     
@@ -24,10 +23,16 @@ class SARIMA_model:
     
     def __init__(self, CT):
         """
+				CT is the CrimeMapper object.
         
         """
+				##
         self.errors = []
+
+				## 
         self.PDQ_Values = []
+
+				## The time series for the 
         self.ts = CT.ts.Crimes
         
         self.temp = pd.DataFrame(index=self.date_list,
@@ -43,6 +48,7 @@ class SARIMA_model:
         self.pred_vs_record['Recorded'] = self.ts.values
         #print self.pred_vs_record
         
+
     def fit(self):
         """
         

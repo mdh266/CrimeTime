@@ -13,21 +13,9 @@ from geopy.distance import great_circle
 import geopandas as gpd 
 from shapely.geometry import Point
 
-import matplotlib
-matplotlib.use('Agg')
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
-import StringIO
-
-import matplotlib.pyplot as plt
-from matplotlib.collections import PatchCollection
-from mpl_toolkits.basemap import Basemap
-import base64
-
 from shapely.geometry import Point, MultiPoint, MultiPolygon
 from descartes import PolygonPatch
 
-#import folium
 
 from statsmodels.tsa.seasonal import seasonal_decompose
 import sys
@@ -37,15 +25,25 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 class CrimeMapper(object):
 	"""
-    
+  This is the main class for CrimeTime. It will deal with all the back end
+	data management and interacting with the database.
 	"""    
 	geolocator = Nominatim()
     
 	def __init__(self):
+		"""
+		Constructor just makes a geopandas dataframe based off the police precincts.
+		"""
+		## Police precinct geopandas dataframe
 		self.geo_df = gpd.read_file("./data/Police_Precincts.geojson")
         
 	def find_precinct(self, address):
-		## Boolean of whether the precinct of address is found
+		""" 
+		Takes in address and finds the police precint the address belongs to.
+		Returns a Boolean of whether the precinct of address is found.
+		"""
+
+		## Boolean of whether the precinct of address is found	
 		self.prec_found = False
 		## location of the address
 		self.location = self.geolocator.geocode(address)
@@ -72,10 +70,18 @@ class CrimeMapper(object):
 
 			return self.prec_found
 
+
+
 	def get_crime_data(self):
+		"""
+		Gets the crime data for this police precinct from the SQL Database
+		"""
 		sql_query = 'SELECT * FROM Crime_Data WHERE PRECINCT = '\
 								+ str(self.prec)
+
 		conn = sqlite3.connect('./data/CrimeTime.db')
+
+		## The crime dataframe for the selected police precint.
 		self.df = pd.read_sql_query(sql_query, conn)
 		conn.close()
         
@@ -91,6 +97,7 @@ class CrimeMapper(object):
 		Turn the dataframe into a pandas series with daily events.
 		"""
 		dont_continue = False
+		## The type of crime: Larceny, Burglary, Assault, Robbery
 		self.crime_name = crime_name
         
 		if(crime_name == 'Larceny'):
@@ -108,6 +115,7 @@ class CrimeMapper(object):
 		if(dont_continue == False):
 			aux = self.crime_df['DATE'].apply(self.restamp)
 			temp = pd.Series(Counter(aux))
+			## The pandas time series of the monthly number of specified crimes in precinct
 			self.ts = temp.to_frame()
 			self.ts.reset_index(inplace=True)
 			self.ts.columns = ['Date','Crimes']
@@ -118,6 +126,8 @@ class CrimeMapper(object):
 
 	def percent_per_day(self):
 		"""
+		Makes a pandas time series for the number of crimes that occurred in 
+		the selected precinct on each day of the week.
 		"""
 		CRIME_DAYS = 100 * (self.crime_df.groupby('WEEKDAY').size() 
                     /self.crime_df.groupby('WEEKDAY').size().sum())
@@ -127,6 +137,7 @@ class CrimeMapper(object):
 		days = ['Monday','Tuesday','Wednesday',
 						'Thursday','Friday','Saturday','Sunday']
     
+		## Time series of the number of crimes that occurred in the day of week
 		self.DAYS_OF_CRIME = pd.Series()
 		for day in days:
 			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
@@ -136,6 +147,8 @@ class CrimeMapper(object):
         
 	def percent_per_hour(self):
 		""" 
+		Makes a pandas time series for the number of crimes that occurred in 
+		the selected precinct on hour of the day.
 		"""
 		self.crime_df['HOUR'] = self.crime_df['HOUR'].astype(int)
 		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
@@ -150,4 +163,7 @@ class CrimeMapper(object):
 		return str(self.prec)
 
 	def get_address(self):
+		"""
+		Returns the address that was searched for.
+		"""
 		return str(self.address)

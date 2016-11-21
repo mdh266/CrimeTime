@@ -7,7 +7,6 @@ import os.path
 
 import geopandas as gpd 
 
-
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -33,37 +32,47 @@ from CrimeMapper import CrimeMapper
 
 
 @app.route('/')
-@app.route('/index')
-def index():
-	user = {'nickname': 'Mike'}
-	return render_template("index.html",
-					title = 'Home',
-					user = user)
-
 @app.route('/input')
 def crime_time_input():
+	"""
+	Forwards the input page for the website.
+	"""
 	return render_template("input.html")
 
 @app.route('/contact')
 def contact():
+	"""
+	Forwards the contact page for the website.
+	"""
 	return render_template("contact.html")
 
 
 @app.route('/output')
 def crime_time_output():
+	"""
+	This function drives the output for the website. It takes in the address supplied by
+	the user and drives all the plotting and then fowards to the output page for the 
+	website.
+	"""
+	## Crime type: Larceny, Robbery, Burglary, Assault
 	crime_type = str(request.args.get('crime_type'))
+	## The address entered by the user.
 	address = str(request.args.get('nyc_address'))
+
 	CT = CrimeMapper()
 	if CT.find_precinct(address) == False:
 		return render_template("error.html")
 	else:
 		CT.get_crime_data()
 		CT.make_timeseries(crime_type)
-
+		## police precinct of the address
 		precinct = int(CT.get_precinct())
 		CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)
 		prec_index = CT.geo_df[CT.geo_df.precinct==precinct].index
 		prec = CT.geo_df['geometry'][prec_index[0]]
+
+		# Now make the map of the police precincts and color in the one
+		# that includes the address the user suppslied.
 		cm = plt.get_cmap('RdBu')
 		num_colours = len(prec)
  
@@ -80,12 +89,14 @@ def crime_time_output():
 		ax.set_xticks([])
 		ax.set_yticks([])
 		plt.tight_layout()
+		
+		# Have to save the image this way so that the program can be run on AWS
 		io = StringIO()
 		fig.savefig(io, format='png')
 		map = base64.encodestring(io.getvalue())
 		map = urllib.quote(map.rstrip('\n'))
 
-
+		# Make the image of the seasonal decomposition of crimes in this police precinct.
 		plt.clf()
 		decomp_crime = seasonal_decompose(CT.ts,freq=12)
 		trend_crime = decomp_crime.trend
@@ -106,12 +117,13 @@ def crime_time_output():
 		plt.ylabel('Monthly Incidents', fontsize=13)
 		plt.legend(fontsize=13)
 
+		# Have to save the image this way so that the program can be run on AWS
 		io2 = StringIO()
 		fig.savefig(io2, format='png')
 		decompose = base64.encodestring(io2.getvalue())
 		decompose = urllib.quote(decompose.rstrip('\n'))
 
-
+		# Make the plot for the crimes which occur on the different days of the week
 		plt.clf()
 		CT.percent_per_day()
 		title = 'Percentage of ' +\
@@ -121,18 +133,19 @@ def crime_time_output():
 		fig = plt.figure(figsize=(9, 8))
         
  		CT.DAYS_OF_CRIME.plot(kind='bar')
-        
+      
 		plt.title(title,fontsize=16)
 		plt.yticks(size=14)
  		plt.xticks(rotation=30,size=14)
 		plt.ylabel('Percent of crimes', fontsize=16)
 
+		# Have to save the image this way so that the program can be run on AWS
 		io3 = StringIO()
 		fig.savefig(io3, format='png')
 		days = base64.encodestring(io3.getvalue())
 		days = urllib.quote(days.rstrip('\n'))
 
-
+		# Make the plot for the crimes which occur on the different hours of the day
 		plt.clf()
 		CT.percent_per_hour()
 		title = 'Percentage of ' + CT.crime_name +\
@@ -147,19 +160,20 @@ def crime_time_output():
 		plt.xlabel('Hour In Day', fontsize=14)
 		plt.ylabel('Pecent of crimes', fontsize=16)
 
+		# Have to save the image this way so that the program can be run on AWS
 		io4 = StringIO()
 		fig.savefig(io4, format='png')
 		hours = base64.encodestring(io4.getvalue())
 		hours = urllib.quote(hours.rstrip('\n'))
 
+		
 		address = CT.get_address()
 		crime_info = {}
 		crime_info['crime_type'] = crime_type
 		crime_info['address'] = address
 		crime_info['precinct'] = precinct
-
-
 		
+		# push the produced images to the output website page
 		return render_template("output.html", 
 													crime_info = crime_info,
 													map=map,
