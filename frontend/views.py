@@ -25,22 +25,12 @@ import urllib
 from shapely.geometry import Point, MultiPoint, MultiPolygon
 from descartes import PolygonPatch
 
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend/")
 from CrimeMapper import CrimeMapper
 
-def root_dir():  # pragma: no cover
-	#print os.path.realpath(__file__)
-  print os.path.dirname(os.path.realpath(__file__))
-  return os.path.dirname(os.path.realpath(__file__))
-
-def get_file(filename):  # pragma: no cover
-	try:
-		src = os.path.join(root_dir(), filename)
-		return open(src).read()
-	except IOError as exc:
-		return str(exc)
 
 @app.route('/')
 @app.route('/index')
@@ -58,73 +48,6 @@ def crime_time_input():
 def contact():
 	return render_template("contact.html")
 
-@app.route('/Hour.jpg')
-def get_hour():
-	mimetypes = {
-  	".css": "text/css",
-    ".html": "text/html",
-    ".js": "application/javascript",
-	}
-	complete_path = os.path.join(root_dir(), '/images/Hour.jpg')
-	complete_path = root_dir() + '/images/Hour.jpg'
-	print complete_path
-	ext = os.path.splitext('/images/Hour.jpg')[1]
-	mimetype = mimetypes.get(ext, "tex")
-	content = get_file(complete_path)
-	return Response(content,mimetype='images/jpg')
-
-@app.route('/Day.jpg')
-def get_day():
-	mimetypes = {
-  	".css": "text/css",
-    ".html": "text/html",
-    ".js": "application/javascript",
-	}
-	complete_path = os.path.join(root_dir(), '/images/Day.jpg')
-	complete_path = root_dir() + '/images/Day.jpg'
-	print complete_path
-	ext = os.path.splitext('/images/Day.jpg')[1]
-	mimetype = mimetypes.get(ext, "tex")
-	content = get_file(complete_path)
-	return Response(content,mimetype='images/jpg')
-
-
-@app.route('/Decomp.jpg')
-def get_decomp():
-	mimetypes = {
-  	".css": "text/css",
-    ".html": "text/html",
-    ".js": "application/javascript",
-	}
-	complete_path = os.path.join(root_dir(), '/images/Decomp.jpg')
-	complete_path = root_dir() + '/images/Decomp.jpg'
-	print complete_path
-	ext = os.path.splitext('/images/Decomp.jpg')[1]
-	mimetype = mimetypes.get(ext, "tex")
-	content = get_file(complete_path)
-	return Response(content,mimetype='images/jpg')
-
-#@app.route('/map')
-#def get_map2():
-#	return send_file('maps/map.html')
-
-@app.route('/map.png')
-def get_map():
-#   return send_file('maps/map.html')
-	mimetypes = {
-  	".css": "text/css",
-    ".html": "text/html",
-    ".js": "application/javascript",
-	}
-	complete_path = os.path.join(root_dir(), '/images/map.png')
-	complete_path = root_dir() + '/images/map.png'
-	print complete_path
-	ext = os.path.splitext('/images/map.png')[1]
-	mimetype = mimetypes.get(ext, "tex")
-	content = get_file(complete_path)
-	return Response(content,mimetype='images/png')
-
-
 
 @app.route('/output')
 def crime_time_output():
@@ -134,25 +57,19 @@ def crime_time_output():
 	if CT.find_precinct(address) == False:
 		return render_template("error.html")
 	else:
-		geo_df = gpd.read_file("./data/Police_Precincts.geojson")
+		CT.get_crime_data()
+		CT.make_timeseries(crime_type)
 
-		#CT.plot_precinct()
-		#CT.get_crime_data()
-		#CT.make_timeseries(crime_type)
-		#CT.decompose_crime()
-		#CT.percent_per_day()
-		#CT.percent_per_hour()
 		precinct = int(CT.get_precinct())
-
-		geo_df['precinct'] = geo_df['precinct'].astype(int)
-		prec_index = geo_df[geo_df.precinct==precinct].index
-		prec = geo_df['geometry'][prec_index[0]]
+		CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)
+		prec_index = CT.geo_df[CT.geo_df.precinct==precinct].index
+		prec = CT.geo_df['geometry'][prec_index[0]]
 		cm = plt.get_cmap('RdBu')
 		num_colours = len(prec)
  
 		fig = plt.figure(figsize=(5, 4))
 		ax = fig.add_subplot(111)
-		geo_df.plot(ax=ax, color='white')
+		CT.geo_df.plot(ax=ax, color='white')
 
 		patches = []
 		for idx, p in enumerate(prec):
@@ -165,16 +82,89 @@ def crime_time_output():
 		plt.tight_layout()
 		io = StringIO()
 		fig.savefig(io, format='png')
-		data = base64.encodestring(io.getvalue())
-		data = urllib.quote(data.rstrip('\n'))
+		map = base64.encodestring(io.getvalue())
+		map = urllib.quote(map.rstrip('\n'))
+
+
+		plt.clf()
+		decomp_crime = seasonal_decompose(CT.ts,freq=12)
+		trend_crime = decomp_crime.trend
+		season_crime = decomp_crime.seasonal
+		y_max = float(CT.ts.max())
+		y_min = float(season_crime.min())
+		#print y_min
+		title = 'Decomposition Of Crimes Involving ' + CT.crime_name +\
+						' in Precinct ' + str(precinct)
+
+		fig = plt.figure(figsize=(7, 6))
+		plt.title(title , fontsize=13)
+		plt.plot(CT.ts, label='Monthly Incident Data', linewidth=3)
+		plt.plot(season_crime, label='Seasonality', linewidth=3)
+		plt.plot(trend_crime, label='Trend', linewidth=3)
+		plt.ylim([(1.25)*y_min,(1.5)*y_max])
+		plt.xlabel('Year', fontsize=13)
+		plt.ylabel('Monthly Incidents', fontsize=13)
+		plt.legend(fontsize=13)
+
+		io2 = StringIO()
+		fig.savefig(io2, format='png')
+		decompose = base64.encodestring(io2.getvalue())
+		decompose = urllib.quote(decompose.rstrip('\n'))
+
+
+		plt.clf()
+		CT.percent_per_day()
+		title = 'Percentage of ' +\
+						CT.crime_name +' in Precinct ' +\
+						str(precinct) + ' by day of week' 
+        
+		fig = plt.figure(figsize=(9, 8))
+        
+ 		CT.DAYS_OF_CRIME.plot(kind='bar')
+        
+		plt.title(title,fontsize=16)
+		plt.yticks(size=14)
+ 		plt.xticks(rotation=30,size=14)
+		plt.ylabel('Percent of crimes', fontsize=16)
+
+		io3 = StringIO()
+		fig.savefig(io3, format='png')
+		days = base64.encodestring(io3.getvalue())
+		days = urllib.quote(days.rstrip('\n'))
+
+
+		plt.clf()
+		CT.percent_per_hour()
+		title = 'Percentage of ' + CT.crime_name +\
+						' in Precinct ' + str(precinct) +\
+						' by time of day' 
+
+		fig = plt.figure(figsize=(8, 8))
+		CT.CRIME_HOURS.plot(kind='bar')
+		plt.title(title,fontsize=15)
+		plt.yticks(size=14)
+		plt.xticks(rotation=45,size=16)
+		plt.xlabel('Hour In Day', fontsize=14)
+		plt.ylabel('Pecent of crimes', fontsize=16)
+
+		io4 = StringIO()
+		fig.savefig(io4, format='png')
+		hours = base64.encodestring(io4.getvalue())
+		hours = urllib.quote(hours.rstrip('\n'))
 
 		address = CT.get_address()
 		crime_info = {}
 		crime_info['crime_type'] = crime_type
 		crime_info['address'] = address
 		crime_info['precinct'] = precinct
+
+
+		
 		return render_template("output.html", 
 													crime_info = crime_info,
-													map=data)
+													map=map,
+													decomp=decompose,
+													day=days,
+													hour=hours)
 
 

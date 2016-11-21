@@ -39,11 +39,10 @@ class CrimeMapper(object):
 	"""
     
 	"""    
-	geo_df = gpd.read_file("./data/Police_Precincts.geojson")
 	geolocator = Nominatim()
     
 	def __init__(self):
-		"""Nothing for now"""
+		self.geo_df = gpd.read_file("./data/Police_Precincts.geojson")
         
 	def find_precinct(self, address):
 		## Boolean of whether the precinct of address is found
@@ -72,54 +71,7 @@ class CrimeMapper(object):
 					self.prec_found = True
 
 			return self.prec_found
-             
-	def plot_precinct(self):
-		"""
-		Plots the police precints and adds a marker of the address 
-		that was entered.
-		"""
-		pathgeo = "./data/Police_Precincts.geojson"
-		self.geo_df['precinct'] = self.geo_df['precinct'].astype(int)
-		prec_index = self.geo_df[self.geo_df.precinct==self.prec].index
-		prec = self.geo_df['geometry'][prec_index[0]]
 
-		#nyc_crime_map = folium.Map(location=self.nyc_coor,zoom_start=10)
-		#nyc_crime_map.choropleth(geo_path=pathgeo)
-		#name = self.location.address
-		## Coordiantes of the entered address
-		#self.coor = [self.location.latitude, self.location.longitude]
-		#folium.Marker(location=self.coor, popup=name).add_to(nyc_crime_map)   
-
-		if not os.path.exists("./frontend/images/"):
-			os.makedirs("./frontend/images/")
-
-		cm = plt.get_cmap('RdBu')
-		num_colours = len(prec)
- 
-		fig = plt.figure(figsize=(5, 4))
-		ax = fig.add_subplot(111)
-		self.geo_df.plot(ax=ax, color='white')
-
-		patches = []
-		for idx, p in enumerate(prec):
-			colour = cm(1. * idx / num_colours)
-			patches.append(PolygonPatch(p, fc='#cc00cc', ec='#555555', 
-                                lw=0.2, alpha=1., zorder=4))
-		ax.add_collection(PatchCollection(patches, match_original=True))
-		ax.set_xticks([])
-		ax.set_yticks([])
-		plt.tight_layout()
-		#title = 'New York City Police Precinct ' + str(self.prec)
-		#plt.title(title, fontsize=13)
-		plt.tight_layout()
-		#plt.savefig("./frontend/images/map.png")#, alpha=True, dpi=300)
-
-		#if os.path.exists("./frontend/maps/map.html"):	
-		#	os.remove("./frontend/maps/map.html")
-
-		#nyc_crime_map.save("./frontend/maps/map.html")
-
-	    
 	def get_crime_data(self):
 		sql_query = 'SELECT * FROM Crime_Data WHERE PRECINCT = '\
 								+ str(self.prec)
@@ -162,34 +114,11 @@ class CrimeMapper(object):
 			self.ts['Date'] = pd.to_datetime(self.ts['Date'])
 			self.ts = self.ts.set_index('Date')
 			self.ts = self.ts.resample('M').sum()
-       
-    
-	def decompose_crime(self):
-		decomp_crime = seasonal_decompose(self.ts,freq=12)
-		trend_crime = decomp_crime.trend
-		season_crime = decomp_crime.seasonal
-		y_max = float(self.ts.max())
-		y_min = float(season_crime.min())
-		#print y_min
-		title = 'Decomposition Of Crimes Involving ' + self.crime_name +\
-						' in Precinct ' + str(self.prec)
-
-		fig = plt.figure(figsize=(7, 6))
-		plt.title(title , fontsize=13)
-		plt.plot(self.ts, label='Monthly Incident Data', linewidth=3)
-		plt.plot(season_crime, label='Seasonality', linewidth=3)
-		plt.plot(trend_crime, label='Trend', linewidth=3)
-		plt.ylim([(1.25)*y_min,(1.5)*y_max])
-		plt.xlabel('Year', fontsize=13)
-		plt.ylabel('Monthly Incidents', fontsize=13)
-		plt.legend(fontsize=13)
-		if not os.path.exists("./frontend/images"):
-			os.makedirs("./frontend/images")
-            
-	#	plt.savefig("./frontend/images/Decomp.jpg")
             
 
 	def percent_per_day(self):
+		"""
+		"""
 		CRIME_DAYS = 100 * (self.crime_df.groupby('WEEKDAY').size() 
                     /self.crime_df.groupby('WEEKDAY').size().sum())
 
@@ -202,48 +131,17 @@ class CrimeMapper(object):
 		for day in days:
 			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
     
-		title = 'Percentage of ' +\
-						self.crime_name +' in Precinct ' +\
-						str(self.prec) + ' by day of week' 
-        
-		fig = plt.figure(figsize=(9, 8))
-        
- 		self.DAYS_OF_CRIME.plot(kind='bar')
-        
-		plt.title(title,fontsize=16)
-		plt.yticks(size=14)
- 		plt.xticks(rotation=30,size=14)
-		#plt.xlabel('Day of week', fontsize=14)
-		plt.ylabel('Percent of crimes', fontsize=16)
-		if not os.path.exists("./frontend/images"):
-			os.makedirs("./frontend/images")
- 
-		#plt.savefig("./frontend/images/Day.jpg")
-        
+
         
         
 	def percent_per_hour(self):
+		""" 
+		"""
 		self.crime_df['HOUR'] = self.crime_df['HOUR'].astype(int)
 		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
 		self.CRIME_HOURS = 100 * (self.CRIME_HOURS
                           /self.CRIME_HOURS.sum())
     
-		title = 'Percentage of ' + self.crime_name +\
-						' in Precinct ' + str(self.prec) +\
-						' by time of day' 
-
-		fig = plt.figure(figsize=(8, 8))
-		self.CRIME_HOURS.plot(kind='bar')
-		plt.title(title,fontsize=15)
-		plt.yticks(size=14)
-		plt.xticks(rotation=45,size=16)
-		plt.xlabel('Hour In Day', fontsize=14)
-		plt.ylabel('Pecent of crimes', fontsize=16)
-
-		if not os.path.exists("./frontend/images"):
-			os.makedirs("./frontend/images")
-
-		#plt.savefig("./frontend/images/Hour.jpg")
 
 	def get_precinct(self):
 		"""
