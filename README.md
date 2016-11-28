@@ -1,6 +1,6 @@
 **CRIMETIME**
 
-*Visualizing Crime Rates In New York City*
+*Web application for visualizing crime rates in New York City.  To see the web application in action visit: www.crimetime.online.*
 
 
 
