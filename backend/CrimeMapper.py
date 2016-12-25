@@ -86,7 +86,7 @@ class CrimeMapper(object):
 
 
 
-	def get_crime_data(self,):
+	def get_crime_data(self):
 		"""
 		Gets the crime data for this police precinct from the SQL Database
 		"""
