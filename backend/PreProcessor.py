@@ -16,24 +16,21 @@ class PreProcessor(object):
 	read in the data from the CSV file, clean it and store it to disk.
 	"""
     
-	def __init__(self):
+	def __init__(self, database_name):
 		"""
 		Constructor will just create address and column names.
 		"""
-
-		## The csv file of crime data downloaded from NYC Open Data
-		self.address = "../data/NYPD_7_Major_Felony_Incident_Map.csv"
-    
 		## Column names for the database
-		self.headers = ['DATE','WEEKDAY','MONTH', 'DAY', 'YEAR','HOUR',
-                    'OFFENSE', 'CLASSIFICATION', 'PRECINCT', 
-                    'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
+		self.address = None
+		self.database_name = database_name
 
-			
-	def make_database(self, database_name):
+	def make_NYC_database(self, table_name):
 		"""
 		This function is does all the work.
 		"""
+		## The csv file of crime data downloaded from NYC Open Data
+		self.address = "../data/NYPD_7_Major_Felony_Incident_Map.csv"
+    
 		crime_df = pd.read_csv(self.address,index_col=None)
   	#crime_new_df = pd.DataFrame.copy(crime_df)
 
@@ -46,7 +43,9 @@ class PreProcessor(object):
 		crime_df.drop('Sector',1, inplace=True)
         
     # rename the columns
-		crime_df.columns = self.headers
+		crime_df.columns = ['DATE','WEEKDAY','MONTH', 'DAY', 'YEAR','HOUR',
+                    		'OFFENSE', 'CLASSIFICATION', 'PRECINCT', 
+                  		  'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
 
 		crime_df.dropna(inplace=True)
 
@@ -77,15 +76,11 @@ class PreProcessor(object):
         
 		crime_df = crime_df[crime_df.YEAR >= 2006]
         
-		conn = sqlite3.connect(database_name)
-		crime_df.to_sql('Crime_Data', conn,flavor='sqlite',index=False)
+		conn = sqlite3.connect(self.database_name)
+		crime_df.to_sql(table_name, conn,flavor='sqlite',index=False)
 		conn.close()
-        
-		self.data_base_name = database_name
-		self.table_name = 'Crime_Data'
-
 
 
 if __name__ == "__main__":
-	PreProcess = PreProcessor()
-	PreProcess.make_database("../data/CrimeTime.db")
+	PreProcess = PreProcessor("../data/CrimeTime.db")
+	PreProcess.make_NYC_database("NYC_Crime")

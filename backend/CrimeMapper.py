@@ -34,9 +34,22 @@ class CrimeMapper(object):
 		"""
 		Constructor just makes a geopandas dataframe based off the police precincts.
 		"""
+		
 		## Police precinct geopandas dataframe
-		self.geo_df = gpd.read_file("./data/Police_Precincts.geojson")
-		#self.geo_df = gpd.read_file("../data/Police_Precincts.geojson")
+		self.geo_df     = gpd.read_file("./data/NYC_Police_Precincts.geojson")
+		#self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
+
+		self.prec_found    = None
+		self.location      = None
+		self.address       = None 
+		self.prec 			   = None
+		self.crime_name    = None
+		self.df  					 = None
+		self.crime_df			 = None
+		self.ts						 = None
+		self.DAYS_OF_CRIME = None
+		self.CRIME_HOURS   = None
+
 
 	def find_precinct(self, address):
 		""" 
@@ -73,11 +86,11 @@ class CrimeMapper(object):
 
 
 
-	def get_crime_data(self):
+	def get_crime_data(self,):
 		"""
 		Gets the crime data for this police precinct from the SQL Database
 		"""
-		sql_query = 'SELECT * FROM Crime_Data WHERE PRECINCT = '\
+		sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
 								+ str(self.prec)
 	
 		#conn = sqlite3.connect('../data/CrimeTime.db')
@@ -110,6 +123,8 @@ class CrimeMapper(object):
 			self.crime_df = self.df[self.df.OFFENSE == 'FELONY ASSAULT']
 		elif(crime_name == 'Burglary'):
 			self.crime_df = self.df[self.df.OFFENSE == 'BURGLARY']  
+#		elif(crime_name == 'Car Theft'):
+#			self.crime_df = self.df[self.df.OFFENSE == 'GRAND LARCENY OF MOTOR VEHICLE']
 		else:
 			dont_continue = True
 			print "Cant Work With That Crime Type"
