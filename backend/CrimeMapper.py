@@ -38,18 +38,18 @@ class CrimeMapper(object):
 		## Police precinct geopandas dataframe
 		self.geo_df     = gpd.read_file("./data/NYC_Police_Precincts.geojson")
 		#self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
-
+	
+		# other data members
 		self.prec_found    = None
 		self.location      = None
 		self.address       = None 
 		self.prec 			   = None
 		self.crime_name    = None
-		self.df  					 = None
 		self.crime_df			 = None
 		self.ts						 = None
 		self.DAYS_OF_CRIME = None
 		self.CRIME_HOURS   = None
-
+		self.sql_query		 = None
 
 	def find_precinct(self, address):
 		""" 
@@ -86,19 +86,39 @@ class CrimeMapper(object):
 
 
 
-	def get_crime_data(self):
+	def get_crime_data(self, crime_name):
 		"""
 		Gets the crime data for this police precinct from the SQL Database
 		"""
-		sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
-								+ str(self.prec)
-	
-		#conn = sqlite3.connect('../data/CrimeTime.db')
-		conn = sqlite3.connect('./data/CrimeTime.db')
+		self.crime_name = crime_name
+		dont_continue = False
+		print crime_name
 
-		## The crime dataframe for the selected police precint.
-		self.df = pd.read_sql_query(sql_query, conn)
-		conn.close()
+		if(crime_name == 'Larceny'):
+			self.crime_name = 'GRAND LARCENY'
+		elif(crime_name == 'Robbery'):
+			self.crime_name = 'ROBBERY'
+		elif(crime_name == 'Assault'):
+			self.crime_name = 'FELONY ASSAULT'
+		elif(crime_name == 'Burglary'):
+			self.crime_name = 'BURGLARY'
+		elif(crime_name == 'Car Theft'):
+			self.crime_name = 'GRAND LARCENY OF MOTOR VEHICLE'
+		else:
+			dont_continue = True
+			print "Cant Work With That Crime Type"
+
+		if(dont_continue == False):
+			self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
+									+ str(self.prec) + ' AND OFFENSE = \' ' \
+									+ str(self.crime_name) + '\' ' 
+
+			#conn = sqlite3.connect('../data/CrimeTime.db')
+			conn = sqlite3.connect('./data/CrimeTime.db')
+
+			## The crime dataframe for the selected police precint.
+			self.crime_df = pd.read_sql_query(self.sql_query, conn)
+			conn.close()
         
 	def restamp(self, row):
 		"""
@@ -107,38 +127,19 @@ class CrimeMapper(object):
 		"""
 		return datetime.strptime(row, '%m/%d/%Y %I:%M:%S %p').date()
     
-	def make_timeseries(self, crime_name):
+	def make_timeseries(self):
 		""" 
 		Turn the dataframe into a pandas series with daily events.
 		"""
-		dont_continue = False
-		## The type of crime: Larceny, Burglary, Assault, Robbery
-		self.crime_name = crime_name
-        
-		if(crime_name == 'Larceny'):
-			self.crime_df = self.df[self.df.OFFENSE == 'GRAND LARCENY']
-		elif(crime_name == 'Robbery'):
-			self.crime_df = self.df[self.df.OFFENSE == 'ROBBERY']
-		elif(crime_name == 'Assault'):
-			self.crime_df = self.df[self.df.OFFENSE == 'FELONY ASSAULT']
-		elif(crime_name == 'Burglary'):
-			self.crime_df = self.df[self.df.OFFENSE == 'BURGLARY']  
-#		elif(crime_name == 'Car Theft'):
-#			self.crime_df = self.df[self.df.OFFENSE == 'GRAND LARCENY OF MOTOR VEHICLE']
-		else:
-			dont_continue = True
-			print "Cant Work With That Crime Type"
-    
-		if(dont_continue == False):
-			aux = self.crime_df['DATE'].apply(self.restamp)
-			temp = pd.Series(Counter(aux))
-			## The pandas time series of the monthly number of specified crimes in precinct
-			self.ts = temp.to_frame()
-			self.ts.reset_index(inplace=True)
-			self.ts.columns = ['Date','Crimes']
-			self.ts['Date'] = pd.to_datetime(self.ts['Date'])
-			self.ts = self.ts.set_index('Date')
-			self.ts = self.ts.resample('M').sum()
+		aux = self.crime_df['DATE'].apply(self.restamp)
+		temp = pd.Series(Counter(aux))
+		## The pandas time series of the monthly number of specified crimes in precinct
+		self.ts = temp.to_frame()
+		self.ts.reset_index(inplace=True)
+		self.ts.columns = ['Date','Crimes']
+		self.ts['Date'] = pd.to_datetime(self.ts['Date'])
+		self.ts = self.ts.set_index('Date')
+		self.ts = self.ts.resample('M').sum()
             
 
 	def percent_per_day(self):

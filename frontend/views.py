@@ -65,8 +65,8 @@ def crime_time_output():
 	if CT.find_precinct(address) == False:
 		return render_template("error.html")
 	else:
-		CT.get_crime_data()
-		CT.make_timeseries(crime_type)
+		CT.get_crime_data(crime_type)
+		CT.make_timeseries()
 		## police precinct of the address
 		precinct = int(CT.get_precinct())
 		CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)
