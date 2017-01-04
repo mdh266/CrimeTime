@@ -73,6 +73,7 @@ def crime_time_output():
 		prec_index = CT.geo_df[CT.geo_df.precinct==precinct].index
 		prec = CT.geo_df['geometry'][prec_index[0]]
 
+	
 		# Now make the map of the police precincts and color in the one
 		# that includes the address the user suppslied.
 		cm = plt.get_cmap('RdBu')
@@ -91,7 +92,7 @@ def crime_time_output():
 		ax.set_xticks([])
 		ax.set_yticks([])
 		plt.tight_layout()
-		
+
 		# Have to save the image this way so that the program can be run on AWS
 		io = StringIO()
 		fig.savefig(io, format='png')
@@ -118,14 +119,15 @@ def crime_time_output():
 		plt.xlabel('Year', fontsize=13)
 		plt.ylabel('Monthly Incidents', fontsize=13)
 		plt.legend(fontsize=13)
-
+	
 		# Have to save the image this way so that the program can be run on AWS
 		io2 = StringIO()
 		fig.savefig(io2, format='png')
 		decompose = base64.encodestring(io2.getvalue())
 		decompose = urllib.quote(decompose.rstrip('\n'))
 
-		# Make the plot for the crimes which occur on the different days of the week
+
+	# Make the plot for the crimes which occur on the different days of the week
 		plt.clf()
 		CT.percent_per_day()
 		title = 'Percentage of ' +\
@@ -174,13 +176,11 @@ def crime_time_output():
 		crime_info['crime_type'] = crime_type
 		crime_info['address'] = address
 		crime_info['precinct'] = precinct
-		
-		# push the produced images to the output website page
+
+	  # push the produced images to the output website page
 		return render_template("output.html", 
 													crime_info = crime_info,
 													map=map,
 													decomp=decompose,
 													day=days,
 													hour=hours)
-
-

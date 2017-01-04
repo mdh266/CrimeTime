@@ -92,7 +92,6 @@ class CrimeMapper(object):
 		"""
 		self.crime_name = crime_name
 		dont_continue = False
-		print crime_name
 
 		if(crime_name == 'Larceny'):
 			self.crime_name = 'GRAND LARCENY'
@@ -110,7 +109,7 @@ class CrimeMapper(object):
 
 		if(dont_continue == False):
 			self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
-									+ str(self.prec) + ' AND OFFENSE = \' ' \
+									+ str(self.prec) + ' AND OFFENSE = \'' \
 									+ str(self.crime_name) + '\' ' 
 
 			#conn = sqlite3.connect('../data/CrimeTime.db')
