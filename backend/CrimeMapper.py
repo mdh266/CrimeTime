@@ -139,7 +139,8 @@ class CrimeMapper(object):
 		self.ts['Date'] = pd.to_datetime(self.ts['Date'])
 		self.ts = self.ts.set_index('Date')
 		self.ts = self.ts.resample('M').sum()
-            
+		if(self.ts.isnull().values.any()):
+			self.ts.dropna(inplace=True)           
 
 	def percent_per_day(self):
 		"""

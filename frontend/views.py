@@ -107,7 +107,7 @@ def crime_time_output():
 		y_max = float(CT.ts.max())
 		y_min = float(season_crime.min())
 		#print y_min
-		title = 'Decomposition Of Crimes Involving ' + CT.crime_name +\
+		title = 'Decomposition Of Crimes Involving ' +crime_type +\
 						' in Precinct ' + str(precinct)
 
 		fig = plt.figure(figsize=(7, 6))
@@ -131,7 +131,7 @@ def crime_time_output():
 		plt.clf()
 		CT.percent_per_day()
 		title = 'Percentage of ' +\
-						CT.crime_name +' in Precinct ' +\
+						crime_type +' in Precinct ' +\
 						str(precinct) + ' by day of week' 
         
 		fig = plt.figure(figsize=(9, 8))
@@ -152,7 +152,7 @@ def crime_time_output():
 		# Make the plot for the crimes which occur on the different hours of the day
 		plt.clf()
 		CT.percent_per_hour()
-		title = 'Percentage of ' + CT.crime_name +\
+		title = 'Percentage of ' +crime_type +\
 						' in Precinct ' + str(precinct) +\
 						' by time of day' 
 
