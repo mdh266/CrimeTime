@@ -85,6 +85,36 @@ class CrimeMapper(object):
 			return self.prec_found
 
 
+	def get_all_crime_data(self):
+		"""
+		Get all the crime data for this police precinct from excluding rape 
+		and murder.
+		"""
+		self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
+									+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
+									+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTE\''
+
+		conn = sqlite3.connect('./data/CrimeTime.db')
+
+		## The crime dataframe for the selected police precint.
+		df = pd.read_sql_query(self.sql_query, conn)
+		conn.close()
+		self.crime_df = df[df.OFFENSE == 'FELONY ASSAULT'] 
+		self.make_timeseries()
+		self.assault_ts = seasonal_decompose(self.ts,freq=12).trend
+		self.crime_df = df[df.OFFENSE == 'ROBBERY'] 
+		self.make_timeseries()
+		self.robbery_ts  = seasonal_decompose(self.ts,freq=12).trend
+		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY'] 
+		self.make_timeseries()
+		self.larceny_ts  = seasonal_decompose(self.ts,freq=12).trend
+		self.crime_df = df[df.OFFENSE == 'BURGLARY'] 
+		self.make_timeseries()
+		self.burglary_ts  = seasonal_decompose(self.ts,freq=12).trend
+		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY OF MOTOR VEHICLE'] 
+		self.make_timeseries()
+		self.car_ts  = seasonal_decompose(self.ts,freq=12).trend
+
 
 	def get_crime_data(self, crime_name):
 		"""
@@ -160,7 +190,6 @@ class CrimeMapper(object):
 		for day in days:
 			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
     
-
         
 	def percent_per_hour(self):
 		""" 
@@ -171,7 +200,6 @@ class CrimeMapper(object):
 		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
 		self.CRIME_HOURS = 100 * (self.CRIME_HOURS
                           /self.CRIME_HOURS.sum())
-    
 
 	def get_precinct(self):
 		"""
