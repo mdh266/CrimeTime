@@ -104,8 +104,8 @@ class SARIMA_model:
         
         for p in range(1,3):
             for q in range(1,3):
-                for P in range(0,3):
-                    for Q in range(0,3):
+                for P in range(0,2):
+                    for Q in range(0,2):
                         self.mod = sm.tsa.SARIMAX(self.ts, 
                                         order=(p,1,q),
                                         seasonal_order=(P,1,Q,12),
