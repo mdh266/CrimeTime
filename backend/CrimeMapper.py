@@ -36,8 +36,8 @@ class CrimeMapper(object):
 		"""
 		
 		## Police precinct geopandas dataframe
-		#self.geo_df     = gpd.read_file("./data/NYC_Police_Precincts.geojson")
-		self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
+		self.geo_df     = gpd.read_file("./data/NYC_Police_Precincts.geojson")
+		#self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
 	
 		# other data members
 		self.prec_found    = None
@@ -142,8 +142,8 @@ class CrimeMapper(object):
 									+ str(self.prec) + ' AND OFFENSE = \'' \
 									+ str(self.crime_name) + '\' ' 
 
-			conn = sqlite3.connect('../data/CrimeTime.db')
-			#conn = sqlite3.connect('./data/CrimeTime.db')
+			#conn = sqlite3.connect('../data/CrimeTime.db')
+			conn = sqlite3.connect('./data/CrimeTime.db')
 
 			## The crime dataframe for the selected police precint.
 			self.crime_df = pd.read_sql_query(self.sql_query, conn)

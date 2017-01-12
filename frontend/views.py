@@ -30,6 +30,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend/")
 from CrimeMapper import CrimeMapper
+from Forcasting import Seasonal_Arima
 
 
 @app.route('/')
@@ -89,82 +90,166 @@ def crime_time_output():
 			if timeline == "Historical":
 				return historical(CT,prec,crime_type)
 			else:
-				return render_template("future.html")
-	
+				return future(CT, crime_type)
+
+
 def all_crimes(CT):
-		crime_info = {}
-		crime_info['address'] = CT.get_address()
-		crime_info['precinct'] = CT.get_precinct()
-		CT.get_all_crime_data()
+	"""
+	Make the map of the precinct and historical crime rates 
+	for that all the different 
+	crimes and send the images off to the html file.
+	"""
+	crime_info = {}
+	crime_info['address'] = CT.get_address()
+	crime_info['precinct'] = CT.get_precinct()
+	CT.get_all_crime_data()
 
-		#######################################################
-		# make map
-		#######################################################
+	#######################################################
+	# make map
+	#######################################################
 
-		precinct = int(CT.get_precinct())
-		CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)
-		prec_index = CT.geo_df[CT.geo_df.precinct==precinct].index
-		prec = CT.geo_df['geometry'][prec_index[0]]
+	precinct = int(CT.get_precinct())
+	CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)
+	prec_index = CT.geo_df[CT.geo_df.precinct==precinct].index
+	prec = CT.geo_df['geometry'][prec_index[0]]
 
-		# Now make the map of the police precincts and color in the one
-		# that includes the address the user suppslied.
-		cm = plt.get_cmap('RdBu')
-		num_colours = len(prec)
+	# Now make the map of the police precincts and color in the one
+	# that includes the address the user suppslied.
+	cm = plt.get_cmap('RdBu')
+	num_colours = len(prec)
  
-		fig = plt.figure(figsize=(5, 4))
-		ax = fig.add_subplot(111)
-		CT.geo_df.plot(ax=ax, color='white')
+	fig = plt.figure(figsize=(5, 4))
+	ax = fig.add_subplot(111)
+	CT.geo_df.plot(ax=ax, color='white')
 
-		patches = []
-		for idx, p in enumerate(prec):
-			colour = cm(1. * idx / num_colours)
-			patches.append(PolygonPatch(p, fc='#cc00cc', ec='#555555', 
+	patches = []
+	for idx, p in enumerate(prec):
+		colour = cm(1. * idx / num_colours)
+		patches.append(PolygonPatch(p, fc='#cc00cc', ec='#555555', 
       		                          lw=0.2, alpha=1., zorder=4))
-		ax.add_collection(PatchCollection(patches, match_original=True))
-		ax.set_xticks([])
-		ax.set_yticks([])
-		#plt.label("New York City Police Precincts")
-		plt.tight_layout()
+	ax.add_collection(PatchCollection(patches, match_original=True))
+	ax.set_xticks([])
+	ax.set_yticks([])
+	#plt.label("New York City Police Precincts")
+	plt.tight_layout()
 
-		# Have to save the image this way so that the program can be run on AWS
-		io = StringIO()
-		fig.savefig(io, format='png')
-		map = base64.encodestring(io.getvalue())
-		map = urllib.quote(map.rstrip('\n'))
+	# Have to save the image this way so that the program can be run on AWS
+	io = StringIO()
+	fig.savefig(io, format='png')
+	map = base64.encodestring(io.getvalue())
+	map = urllib.quote(map.rstrip('\n'))
 
-		#######################################################
-		# make breakdown of stuff
-		#######################################################
+	#######################################################
+	# make breakdown of stuff
+	#######################################################
 
-		y_max = 1.5 * float(CT.larceny_ts.max())
-		y_min = 0
+	y_max = 1.5 * float(CT.larceny_ts.max())
+	y_min = 0
 
-		plt.clf()
-		fig = plt.figure(figsize=(6, 5))
-		plt.ylim([y_min,y_max])
-		plt.plot(CT.larceny_ts, label='Larceny', linewidth=3)
-		plt.plot(CT.assault_ts, label='Assault', linewidth=3)
-		plt.plot(CT.robbery_ts, label='Robbery', linewidth=3)
-		plt.plot(CT.burglary_ts, label='Burglary', linewidth=3)
-		plt.plot(CT.car_ts, label='Car Theft', linewidth=3)
-		plt.xlabel('Year', fontsize=13)
-		plt.ylabel('Monthly Incidents', fontsize=13)
-		plt.legend(fontsize=13,ncol=2)
-		plt.title("Monthly Crime Trends",fontsize=13)
+	plt.clf()
+	fig = plt.figure(figsize=(6, 5))
+	plt.ylim([y_min,y_max])
+	plt.plot(CT.larceny_ts, label='Larceny', linewidth=3)
+	plt.plot(CT.assault_ts, label='Assault', linewidth=3)
+	plt.plot(CT.robbery_ts, label='Robbery', linewidth=3)
+	plt.plot(CT.burglary_ts, label='Burglary', linewidth=3)
+	plt.plot(CT.car_ts, label='Car Theft', linewidth=3)
+	plt.xlabel('Year', fontsize=13)
+	plt.ylabel('Monthly Incidents', fontsize=13)
+	plt.legend(fontsize=13,ncol=2)
+	plt.title("Monthly Crime Trends",fontsize=13)
 	
-		# Have to save the image this way so that the program can be run on AWS
-		io2 = StringIO()
-		fig.savefig(io2, format='png')
-		trends = base64.encodestring(io2.getvalue())
-		trends = urllib.quote(trends.rstrip('\n'))
+	# Have to save the image this way so that the program can be run on AWS
+	io2 = StringIO()
+	fig.savefig(io2, format='png')
+	trends = base64.encodestring(io2.getvalue())
+	trends = urllib.quote(trends.rstrip('\n'))
 
-		return render_template("AllCrimes.html",
-														map=map,
-														trends=trends,
-														crime_info = crime_info)
+	return render_template("AllCrimes.html",
+													map=map,
+													trends=trends,
+													crime_info = crime_info)
 
 
+def future(CT, crime_type):
+	"""
+	Make the map of the precinct and forecasted crime rate 
+	plot based of the seasonal arima model for that specific
+	crime and send the images off to the html file.
+	"""
+	#######################################################
+	# make map
+	#######################################################
+
+	precinct = int(CT.get_precinct())
+	CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)
+	prec_index = CT.geo_df[CT.geo_df.precinct==precinct].index
+	prec = CT.geo_df['geometry'][prec_index[0]]
+
+	# Now make the map of the police precincts and color in the one
+	# that includes the address the user suppslied.
+	cm = plt.get_cmap('RdBu')
+	num_colours = len(prec)
+ 
+	fig = plt.figure(figsize=(5, 4))
+	ax = fig.add_subplot(111)
+	CT.geo_df.plot(ax=ax, color='white')
+
+	patches = []
+	for idx, p in enumerate(prec):
+		colour = cm(1. * idx / num_colours)
+		patches.append(PolygonPatch(p, fc='#cc00cc', ec='#555555', 
+      		                          lw=0.2, alpha=1., zorder=4))
+	ax.add_collection(PatchCollection(patches, match_original=True))
+	ax.set_xticks([])
+	ax.set_yticks([])
+	#plt.label("New York City Police Precincts")
+	plt.tight_layout()
+
+	# Have to save the image this way so that the program can be run on AWS
+	io = StringIO()
+	fig.savefig(io, format='png')
+	map = base64.encodestring(io.getvalue())
+	map = urllib.quote(map.rstrip('\n'))
+
+	fig2 = plt.figure(figsize=(7, 6))
+	plt.clf()
+
+	#######################################################
+	# Make the forecasted crime rates
+	#######################################################
+
+	SAR = Seasonal_Arima(CT)
+	SAR.fit()
+	SAR.forecast()
+	SAR.forecast_results.ix[-24:].plot()
+	plt.ylabel('Monthly Incidents', fontsize=13)
+	title = 'Future monthly ' + crime_type +\
+					' rates in Precinct ' + str(precinct)
+	plt.title(title,fontsize=13)
+	# Have to save the image this way so that the program can be run on AWS
+	io2 = StringIO()
+	fig2.savefig(io2, format='png')
+	future = base64.encodestring(io2.getvalue())
+	future = urllib.quote(future.rstrip('\n'))
+
+	crime_info = {}
+	crime_info['address'] = CT.get_address()
+	crime_info['precinct'] = CT.get_precinct()
+	crime_info['crime_type'] = crime_type
+	
+
+	return render_template("future.html", 
+													crime_info = crime_info,
+													map=map,
+													future=future)
+	
+	
 def historical(CT, prec, crime_type):
+	"""
+	Make the historical plots based of the data and pass them
+	off to the html file.
+	"""
 	# Now make the map of the police precincts and color in the one
 	# that includes the address the user suppslied.
 	precinct = int(CT.get_precinct())

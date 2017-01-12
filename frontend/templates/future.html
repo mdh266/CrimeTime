@@ -55,12 +55,25 @@
     </nav>
 	
 
+	
 		<div class="container">
 		</br>
-        <h2> Not implemented yet.  Checkback soon!</h2>
-
-    </div>
-    
+        <h3> Your Neighborhood Crime Trends.</h3> </br>
+				<p> <b> Your address:</b> </br>
+				<center> <b> {{crime_info.address}} </b> </center> </br>
+				<b>is in police precinct:</b>
+				<center> <b> Police Precinct {{crime_info.precinct}} </b> </center> </br>
+				<b> The image on the left below are the outlines of New York City's police precincts with your precinct highlighted in pink.  
+				The image to the right is the forecasted monthly rates of {{crime_info.crime_type}} in your police precinct.</b></br>
+			<table style="width:100%">
+				<tr>
+				<td>
+			 	<img src="data:image/png;base64,{{ map }}" height=370px width=448px \>
+				</td>
+				<td>
+				<img src="data:image/png;base64,{{ future }}" height=400px width=500px >
+				</td>
+				</tr>
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script src="static/js/bootstrap.min.js"></script>
 
@@ -68,6 +81,7 @@
 
 
   </div> <!-- /.container-->
+
 
 
     <!-- Bootstrap core JavaScript
