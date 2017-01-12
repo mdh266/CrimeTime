@@ -27,3 +27,5 @@
 10.) Matplotlib (1.5.3)
 
 12.) Numpy (1.11.2)
+
+13.) Beautifulsoup4 (4.5.3)

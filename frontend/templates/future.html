@@ -58,11 +58,12 @@
 	
 		<div class="container">
 		</br>
-        <h3> Your Neighborhood Crime Trends.</h3> </br>
+        <h3> Your Neighborhood's Predicted Crime Rates.</h3> </br>
 				<p> <b> Your address:</b> </br>
 				<center> <b> {{crime_info.address}} </b> </center> </br>
 				<b>is in police precinct:</b>
-				<center> <b> Police Precinct {{crime_info.precinct}} </b> </center> </br>
+				<center> <b> {{precinct_info.name}}: {{precinct_info.address}}, 
+				{{precinct_info.borough}}. NY. {{precinct_info.tele}}. </b> </center> </br>
 				<b> The image on the left below are the outlines of New York City's police precincts with your precinct highlighted in pink.  
 				The image to the right is the forecasted monthly rates of {{crime_info.crime_type}} in your police precinct.</b></br>
 			<table style="width:100%">

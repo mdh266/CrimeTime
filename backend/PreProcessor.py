@@ -4,6 +4,8 @@ import numpy as np
 import re
 import pandas as pd
 import sqlite3
+from bs4 import BeautifulSoup
+import urllib2
 
 import sys
 import os.path
@@ -24,9 +26,9 @@ class PreProcessor(object):
 		self.address = None
 		self.database_name = database_name
 
-	def make_NYC_database(self, table_name):
+	def make_NYC_Crime_database(self, table_name):
 		"""
-		This function is does all the work.
+		This function is does all the work to make the crime data base.
 		"""
 		## The csv file of crime data downloaded from NYC Open Data
 		self.address = "../data/NYPD_7_Major_Felony_Incident_Map.csv"
@@ -80,7 +82,72 @@ class PreProcessor(object):
 		crime_df.to_sql(table_name, conn,flavor='sqlite',index=False)
 		conn.close()
 
+	def extract_precinct(self, string):
+		"""
+		For extracting the precinct number from the name of the precinct.
+		Ex: input = 14th precinct, output = 14
+		"""
+		return int(re.findall('(\d+).*',string)[0])
 
+	def extract_string(self, string):
+		"""
+		Removes some bad characters from the beautiful soup unicode and then 
+		returns the string.
+		"""
+		return str(re.sub('\xa0','',string))
+
+	def make_NYC_precinct_database(self):
+		"""
+		This function scrapes the NYC Police website and gathers info on 
+		the police precincts and stores them in the sqlite database.
+		"""
+		names = []
+		numbers = []
+		address = []
+		precincts = []
+		
+		# begin to scrape the website below
+		url = "http://www.nyc.gov/html/nypd/html/home/precincts.shtml"
+		soup = BeautifulSoup(urllib2.urlopen(url).read(),"lxml")
+
+
+		# manhattan, bronx, brooklyn, queens, staten island
+		precincts_in_table = [0,2,4,6,8]
+		# get the manhattan precinct info
+		tables = soup.find_all(class_='bodytext')
+
+		# loop through the tables and extract the precinct info
+		for prec in precincts_in_table:
+			for row in tables[prec].find_all('tr')[0:]:
+				col = row.find_all('td')
+				name = self.extract_string(col[0].find('a').get_text())
+				# deal with the special cases that dont use their number
+				if name == 'Midtown So. Pct.':
+					name = '14th Precinct'
+				if name == 'Central Park Pct.':
+					name = '22nd Precinct'
+				if name == 'Midtown No. Pct.':
+					name = '18th Precinct'
+	
+				names.append(name)
+				precincts.append(self.extract_precinct(name))
+				numbers.append(self.extract_string(col[1].get_text()))
+				address.append(self.extract_string(col[2].get_text()))
+
+		# now make pandas dataframe form the data
+		NYC_Police_Precinct_Info = pd.DataFrame(
+                            {'Precinct':precincts,
+                             'Name':names,
+                             'Address':address,
+                             'Telephone':numbers
+                            })
+		# push it to the sqlite database
+		conn = sqlite3.connect(self.database_name)
+		NYC_Police_Precinct_Info.to_sql("NYC_Precint_Info", conn, flavor='sqlite',index=False)
+		conn.close()
+		
 if __name__ == "__main__":
 	PreProcess = PreProcessor("../data/CrimeTime.db")
-	PreProcess.make_NYC_database("NYC_Crime")
+	#PreProcess.make_NYC_Crime_database("NYC_Crime")
+	PreProcess.make_NYC_precinct_database()
+	

@@ -6,6 +6,7 @@ from flask import send_file
 from flask import redirect, url_for
 import os.path
 
+import sqlite3
 import geopandas as gpd 
 
 import matplotlib
@@ -56,7 +57,6 @@ def about():
 	return render_template("about.html")
 
 
-
 @app.route('/output')
 def crime_time_output():
 	"""
@@ -77,7 +77,7 @@ def crime_time_output():
 		return render_template("error.html")
 	else:
 		if crime_type == "All Crimes":
-			return all_crimes(CT)
+			return all_crimes(CT, borough)
 		else:
 			CT.get_crime_data(crime_type)
 			CT.make_timeseries()
@@ -90,19 +90,24 @@ def crime_time_output():
 			if timeline == "Historical":
 				return historical(CT,prec,crime_type)
 			else:
-				return future(CT, crime_type)
+				return future(CT, crime_type, borough)
 
 
-def all_crimes(CT):
+def all_crimes(CT, borough):
 	"""
 	Make the map of the precinct and historical crime rates 
 	for that all the different 
 	crimes and send the images off to the html file.
 	"""
+	# get the address, crime stats and precinct info
 	crime_info = {}
 	crime_info['address'] = CT.get_address()
 	crime_info['precinct'] = CT.get_precinct()
+
 	CT.get_all_crime_data()
+	
+	precinct_info = CT.get_precinct_info()
+	precinct_info['borough'] = borough
 
 	#######################################################
 	# make map
@@ -168,15 +173,25 @@ def all_crimes(CT):
 	return render_template("AllCrimes.html",
 													map=map,
 													trends=trends,
-													crime_info = crime_info)
+													crime_info = crime_info,
+													precinct_info=precinct_info)
 
 
-def future(CT, crime_type):
+def future(CT, crime_type, borough):
 	"""
 	Make the map of the precinct and forecasted crime rate 
 	plot based of the seasonal arima model for that specific
 	crime and send the images off to the html file.
 	"""
+	# get the crime and precinct info
+	crime_info = {}
+	crime_info['address'] = CT.get_address()
+	crime_info['precinct'] = CT.get_precinct()
+	crime_info['crime_type'] = crime_type
+	
+	precinct_info = CT.get_precinct_info()
+	precinct_info['borough'] = borough
+
 	#######################################################
 	# make map
 	#######################################################
@@ -233,14 +248,11 @@ def future(CT, crime_type):
 	future = base64.encodestring(io2.getvalue())
 	future = urllib.quote(future.rstrip('\n'))
 
-	crime_info = {}
-	crime_info['address'] = CT.get_address()
-	crime_info['precinct'] = CT.get_precinct()
-	crime_info['crime_type'] = crime_type
 	
 
 	return render_template("future.html", 
 													crime_info = crime_info,
+													precinct_info=precinct_info,
 													map=map,
 													future=future)
 	

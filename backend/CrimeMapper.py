@@ -212,3 +212,22 @@ class CrimeMapper(object):
 		Returns the address that was searched for.
 		"""
 		return str(self.address)
+
+	def get_precinct_info(self):
+		"""
+		Returns the police precinct info for the selected precinct
+		"""
+		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
+								+ str(self.prec)
+		
+		conn = sqlite3.connect('./data/CrimeTime.db')
+		df = pd.read_sql_query(sql_query, conn)
+		conn.close()
+	
+		precinct_info = {}
+
+		precinct_info['name'] = str(df['Name'][0])
+		precinct_info['address'] = str(df['Address'][0])
+		precinct_info['tele'] = str(df['Telephone'][0])
+
+		return precinct_info
