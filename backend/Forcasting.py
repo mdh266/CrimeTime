@@ -12,7 +12,7 @@ import pandas as pd
 
 import numpy as np
 
-#import seaborn as sns
+#zzimport seaborn as sns
 
 class Seasonal_Arima(object):
 	"""
@@ -32,19 +32,19 @@ class Seasonal_Arima(object):
 		
 		training_start = datetime.strptime("2006-1-31","%Y-%m-%d")
 		self.training_date_list = [training_start 
-													+ relativedelta(months=x) for x in range(0,108)]
+				+ relativedelta(months=x) for x in range(0,108)]
 
 		validation_start = datetime.strptime("2014-1-31","%Y-%m-%d")
 		self.validation_date_list = [validation_start 
-													+ relativedelta(months=x) for x in range(0,12)]
+				+ relativedelta(months=x) for x in range(0,12)]
 
 		test_start = datetime.strptime("2015-1-31","%Y-%m-%d")
 		self.test_date_list = [test_start 
-													+ relativedelta(months=x) for x in range(0,12)]
+				+ relativedelta(months=x) for x in range(0,12)]
 	
 		forecast_start = datetime.strptime("2016-1-31","%Y-%m-%d")
 		self.forecast_date_list = [forecast_start 
-													+ relativedelta(months=x) for x in range(0,24)]
+				+ relativedelta(months=x) for x in range(0,24)]
 
 		# errors in the model
 		self.errors = []

@@ -60,7 +60,11 @@ class CrimeMapper(object):
 		## Boolean of whether the precinct of address is found	
 		self.prec_found = False
 		## location of the address
-		self.location = self.geolocator.geocode(address)
+		try:
+			self.location = self.geolocator.geocode(address)
+		except:
+			pass
+		
 		if(self.location == None):
 			return self.prec_found
 		else:
@@ -142,8 +146,8 @@ class CrimeMapper(object):
 									+ str(self.prec) + ' AND OFFENSE = \'' \
 									+ str(self.crime_name) + '\' ' 
 
-			#conn = sqlite3.connect('../data/CrimeTime.db')
-			conn = sqlite3.connect('./data/CrimeTime.db')
+			conn = sqlite3.connect('../data/CrimeTime.db')
+			#conn = sqlite3.connect('./data/CrimeTime.db')
 
 			## The crime dataframe for the selected police precint.
 			self.crime_df = pd.read_sql_query(self.sql_query, conn)
