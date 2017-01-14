@@ -34,7 +34,6 @@ class PreProcessor(object):
 		self.address = "../data/NYPD_7_Major_Felony_Incident_Map.csv"
     
 		crime_df = pd.read_csv(self.address,index_col=None)
-  	#crime_new_df = pd.DataFrame.copy(crime_df)
 
 		crime_df.drop('OBJECTID',1, inplace=True)
 		crime_df.drop('Identifier',1, inplace=True)
@@ -44,18 +43,18 @@ class PreProcessor(object):
 		crime_df.drop('Jurisdiction',1, inplace=True)
 		crime_df.drop('Sector',1, inplace=True)
         
-    # rename the columns
+		# rename the columns
 		crime_df.columns = ['DATE','WEEKDAY','MONTH', 'DAY', 'YEAR','HOUR',
                     		'OFFENSE', 'CLASSIFICATION', 'PRECINCT', 
                   		  'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
 
 		crime_df.dropna(inplace=True)
 
-    # Convert precinct from float value to int value
+		# Convert precinct from float value to int value
 		crime_df['PRECINCT'] = crime_df['PRECINCT'].astype(int)
 		crime_df['YEAR'] = crime_df['YEAR'].astype(int)
         
-    # Rewrite the points to get their latitudes and longitudes
+		# Rewrite the points to get their latitudes and longitudes
 		crime_points = crime_df['EXTRA']
 		NUM_CRIMES = crime_points.shape[0]
 
@@ -72,7 +71,7 @@ class PreProcessor(object):
 		crime_df['LONGITUDE'] = CRIME_LONGITUDE
 		crime_df['LATITUDE'] = CRIME_LATITUDE
     
-    #DROP EXTRA COLUMNS
+		#DROP EXTRA COLUMNS
 		crime_df.drop('CLASSIFICATION',1,inplace=True)
 		crime_df.drop('EXTRA',1,inplace=True)
         
@@ -143,7 +142,8 @@ class PreProcessor(object):
                             })
 		# push it to the sqlite database
 		conn = sqlite3.connect(self.database_name)
-		NYC_Police_Precinct_Info.to_sql("NYC_Precint_Info", conn, flavor='sqlite',index=False)
+		NYC_Police_Precinct_Info.to_sql("NYC_Precint_Info", conn, 
+						flavor='sqlite',index=False)
 		conn.close()
 		
 if __name__ == "__main__":
