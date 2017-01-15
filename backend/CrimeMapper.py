@@ -15,6 +15,7 @@ from shapely.geometry import Point
 
 from shapely.geometry import Point, MultiPoint, MultiPolygon
 from descartes import PolygonPatch
+import matplotlib.pyplot as plt
 
 
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -36,7 +37,7 @@ class CrimeMapper(object):
 		"""
 		
 		## Police precinct geopandas dataframe
-		self.geo_df     = gpd.read_file("./data/NYC_Police_Precincts.geojson")
+		self.geo_df     = gpd.read_file("../data/NYC_Police_Precincts.geojson")
 		#self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
 	
 		# other data members
@@ -224,7 +225,8 @@ class CrimeMapper(object):
 		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
 								+ str(self.prec)
 		
-		conn = sqlite3.connect('./data/CrimeTime.db')
+		#conn = sqlite3.connect('./data/CrimeTime.db')
+		conn = sqlite3.connect('../data/CrimeTime.db')
 		df = pd.read_sql_query(sql_query, conn)
 		conn.close()
 	
@@ -235,3 +237,63 @@ class CrimeMapper(object):
 		precinct_info['tele'] = str(df['Telephone'][0])
 
 		return precinct_info
+
+	def plot_decompose(self):
+		"""
+		Plots the raw monthly number of crimes, as well as the trend and seasonality
+		of crime in the precinct.
+		"""
+		fig = plt.figure(figsize=(9, 5))
+		plt.clf()
+
+		decomp_crime = seasonal_decompose(self.ts,freq=12)
+		season_crime = decomp_crime.seasonal
+		trend_crime   = decomp_crime.trend
+		
+		title = 'Decomposition Of Crimes Involving ' + self.crime_name +\
+						' in Precinct ' + str(self.prec)
+
+		plt.plot(self.ts, label='Monthly data', linewidth=3)
+		plt.plot(season_crime, label='Seasonality', linewidth=3)
+		plt.plot(trend_crime, label='Trend', linewidth=3)
+		plt.title(title,fontsize=13)
+		plt.xlabel('Year', fontsize=13)
+
+
+	def plot_per_day(self):
+		"""
+		Makes a bar plot of percent of crimes which occur during each day in the week.
+		"""
+		plt.clf()
+		self.percent_per_day()
+		
+		title = 'Percentage of ' +\
+				self.crime_name +' in Precinct ' +\
+				str(self.prec) + ' by day of week' 
+        
+		fig = plt.figure(figsize=(8, 5))
+  	      
+ 		self.DAYS_OF_CRIME.plot(kind='bar')
+      
+		plt.title(title,fontsize=13)
+		plt.yticks(size=14)
+ 		plt.xticks(rotation=30,size=14)
+		plt.ylabel('Percent of crimes', fontsize=13)
+
+	def plot_per_hour(self):
+		"""
+		Makes a bar plot of percent of crimes which occur during each day in the week.
+		"""
+		plt.clf()
+		self.percent_per_hour()
+		title = 'Percentage of ' + self.crime_name +\
+						' in Precinct ' + str(self.prec) +\
+						' by time of day' 
+
+		fig = plt.figure(figsize=(8, 5))
+		self.CRIME_HOURS.plot(kind='bar')
+		plt.title(title,fontsize=13)
+		plt.yticks(size=14)
+		plt.xticks(rotation=45,size=16)
+		plt.xlabel('Hour In Day', fontsize=13)
+		plt.ylabel('Pecent of crimes', fontsize=13)

@@ -1,8 +1,8 @@
 **CRIMETIME**
 
-*Web application for visualizing crime rates in New York City.  To see the web application in action visit: www.crimetime.online.*
+*Web application for visualizing and predict crime rates in New York City.*
 
-
+*To see the web application in action visit: www.crimetime.online.*
 
 **Dependenices**
 
@@ -29,3 +29,9 @@
 12.) Numpy (1.11.2)
 
 13.) Beautifulsoup4 (4.5.3)
+
+
+** Documentation **
+
+
+

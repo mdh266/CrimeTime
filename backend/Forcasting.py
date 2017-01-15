@@ -242,7 +242,6 @@ class Seasonal_Arima(object):
 		""" 
 		Forecast the crime rates into 2016 and 2017.
 		"""
-	
 
 		forecast = pd.DataFrame(index=self.forecast_date_list, 
 													 columns=self.training.columns)
@@ -263,14 +262,14 @@ class Seasonal_Arima(object):
                                       	dynamic= True)
 
 		
-	
 	def plot_test(self):
 		"""
 		Plots the predicted and recorded crime values on the test set.
 		"""
 		
 		self.test[['Recorded','Predicted']].ix[-12:].plot()
-  
+		plt.ylabel('Monthlt incidents')
+		plt.xlabel('Year')  
 	
 	def plot_forecast(self):
 		"""
@@ -278,5 +277,6 @@ class Seasonal_Arima(object):
 		"""
 		#plt.clf()
 		self.forecast_results.ix[-24:].plot()
-
+		plt.ylabel('Monthlt incidents')
+		plt.xlabel('Year')  
         
