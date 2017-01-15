@@ -16,8 +16,8 @@ import numpy as np
 
 class Seasonal_Arima(object):
 	"""
-  This class builds a seasonal based ARIMA model for the suppied time seires
-  """
+  	This class builds a seasonal based ARIMA model for the suppied time seires
+	"""
 
 	def __init__(self, CT):
 		"""
@@ -67,31 +67,31 @@ class Seasonal_Arima(object):
 		self.validation_begin = 96
 		self.validation_end   = 108
 		
-		self.test_begin			= 108
-		self.test_end				= 120
+		self.test_begin	    = 108
+		self.test_end	    = 120
 
 		self.forecast_begin = 120
 		self.forecast_end   = 144
 			
 		# make the training set time series from CrimeMapper object
 		self.training = pd.DataFrame(index=self.training_date_list,
-																columns=['Recorded',
-																				'Predicted'])
+						columns=['Recorded',	
+							 'Predicted'])
 
 		self.training['Recorded'] = CT.ts[self.training_begin:self.training_end]
 
 
 		# make the validation set time series from CrimeMapper object
 		self.validation = pd.DataFrame(index=self.validation_date_list,
-																columns=['Recorded',
-																				'Predicted'])
+						columns=['Recorded',
+							 'Predicted'])
 
 		self.validation['Recorded'] = CT.ts[self.validation_begin:self.validation_end]
 
 		# make the test set
 		self.test = pd.DataFrame(index=self.test_date_list,
-																columns=['Recorded',
-																				'Predicted'])
+						columns=['Recorded',
+					 	 	 'Predicted'])
 
 		self.test['Recorded'] = CT.ts[self.test_begin:self.test_end]
 
@@ -115,24 +115,24 @@ class Seasonal_Arima(object):
 			for Q in range(0,2):
 
 				self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                                  order=(1,1,0),
-																	#trend='n',
-                                  seasonal_order=(P,1,Q,12),
-    	                            enforce_invertibility=False,
-                                  enforce_stationarity=False)
+                                  			order=(1,1,0),
+                                  			seasonal_order=(P,1,Q,12),
+    	                            			enforce_invertibility=False,
+                                  			enforce_stationarity=False)
+							
 				result = self.mod.fit()
 
 				self.validation['Predicted'] = result.predict(
-																								start=self.validation_begin,
-                                                end=self.validation_end,
-                                                dynamic=True)
+							start=self.validation_begin,
+                                               		end=self.validation_end,
+                                                	dynamic=True)
 
 				values = [1,1,0,P,1,Q]
 
 				self.errors.append( np.sqrt(sum(
-                            (self.validation['Predicted']-\
-                            	self.validation['Recorded'])**2)\
-                              /len(self.validation['Predicted'])))
+                           			 (self.validation['Predicted']-\
+                            		 	 self.validation['Recorded'])**2)\
+                             			 /len(self.validation['Predicted'])))
 
 				self.PDQ_vals.append(values)
 
@@ -140,24 +140,24 @@ class Seasonal_Arima(object):
 			for Q in range(0,2):
 
 				self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                                  order=(0,1,1),
-																	#trend='n',
-                                  seasonal_order=(P,1,Q,12),
-    	                            enforce_invertibility=True,
-                                  enforce_stationarity=False)
+                                  			order=(0,1,1),
+                                  			seasonal_order=(P,1,Q,12),
+    	                            			enforce_invertibility=True,
+                                  			enforce_stationarity=False)
+				
 				result = self.mod.fit()
 
-				self.validation['Predicted'] = result.predict(
-																								start=self.validation_begin,
-                                                end=self.validation_end,
-                                                dynamic=True)
+				self.validation['Predicted'] = result.predict(	
+							start=self.validation_begin,
+                        	                        end=self.validation_end,
+                                	                dynamic=True)
 
 				values = [0,1,1,P,1,Q]
 
 				self.errors.append( np.sqrt(sum(
-                            (self.validation['Predicted']-\
-                            	self.validation['Recorded'])**2)\
-                              /len(self.validation['Predicted'])))
+                           		 	(self.validation['Predicted']-\
+                            			self.validation['Recorded'])**2)\
+                             			 /len(self.validation['Predicted'])))
 
 				self.PDQ_vals.append(values)
 
@@ -167,25 +167,24 @@ class Seasonal_Arima(object):
 				for P in range(0,2):
 					for Q in range(0,2):
 						self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                                      order=(p,1,q),
-																			#trend='n',
-                                      seasonal_order=(P,1,Q,12),
-                                      enforce_invertibility=False,
-                                      enforce_stationarity=False)
+                               						order=(p,1,q),
+                                      					seasonal_order=(P,1,Q,12),
+                                      					enforce_invertibility=False,
+                                      					enforce_stationarity=False)
 	
 						result = self.mod.fit()
 				
 		
-						self.validation['Predicted'] = result.predict(
-																								start=self.validation_begin,
-                                                end=self.validation_end,
-                                                dynamic=True)
+						self.validation['Predicted'] = result.predict(	
+									start=self.validation_begin,
+                        			                        end=self.validation_end,
+                                                			dynamic=True)
 
 
 						self.errors.append( np.sqrt(sum(
-                              (self.validation['Predicted']-\
-                               self.validation['Recorded'])**2)\
-                               /len(self.validation['Predicted'])))
+                             					 (self.validation['Predicted']-\
+                               					self.validation['Recorded'])**2)\
+                               					/len(self.validation['Predicted'])))
 
 
 						values = [0,1,1,P,1,Q]
@@ -196,8 +195,8 @@ class Seasonal_Arima(object):
 		# Now find the best model and find error on test set
 		#####################################################################
 
-		future = pd.DataFrame(index=self.test_date_list, 
-													columns=self.training.columns)
+		future = pd.DataFrame(index=self.test_date_list,
+				      columns=self.training.columns)
 
 		self.training = pd.concat([self.training, future])
 
@@ -211,18 +210,17 @@ class Seasonal_Arima(object):
 		self.Q = self.PDQ_vals[self.index][5]
 
 		self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                              order=(self.p,self.d,self.q),
-                              seasonal_order=(self.P,self.D,self.Q,12),
-                            	enforce_invertibility=False,
-                              enforce_stationarity=False)
+                              		order=(self.p,self.d,self.q),
+                              		seasonal_order=(self.P,self.D,self.Q,12),
+                            		enforce_invertibility=False,
+                              		enforce_stationarity=False)
 
 
 		self.results = self.mod.fit()
 
 		self.test['Predicted'] = self.results.predict(start = self.test_begin,
-                                                	end = self.test_end, 
-                                                  dynamic= True)
-
+                                                	      end = self.test_end, 
+                                                  	      dynamic= True)
 
 
 		self.test_error =  np.sqrt(sum(
@@ -244,22 +242,22 @@ class Seasonal_Arima(object):
 		"""
 
 		forecast = pd.DataFrame(index=self.forecast_date_list, 
-													 columns=self.training.columns)
+					 columns=self.training.columns)
 
 		self.training = pd.concat([self.training, forecast])
 
 		self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                              order=(self.p,self.d,self.q),
-                              seasonal_order=(self.P,self.D,self.Q,12),
-                            	enforce_invertibility=True,
-                              enforce_stationarity=False)
+                              		order=(self.p,self.d,self.q),
+                              		seasonal_order=(self.P,self.D,self.Q,12),
+                            		enforce_invertibility=True,
+                              		enforce_stationarity=False)
 
 
 		self.results = self.mod.fit()
 
 		self.forecast_results = self.results.predict(start = self.forecast_begin,
-                                        end = self.forecast_end, 
-                                      	dynamic= True)
+                                        		    end = self.forecast_end, 
+                                      			    dynamic= True)
 
 		
 	def plot_test(self):

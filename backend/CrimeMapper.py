@@ -26,7 +26,7 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
 class CrimeMapper(object):
 	"""
-  This is the main class for CrimeTime. It will deal with all the back end
+	This is the main class for CrimeTime. It will deal with all the back end
 	data management and interacting with the database.
 	"""    
 	geolocator = Nominatim()
@@ -44,13 +44,13 @@ class CrimeMapper(object):
 		self.prec_found    = None
 		self.location      = None
 		self.address       = None 
-		self.prec 			   = None
+		self.prec	   = None
 		self.crime_name    = None
-		self.crime_df			 = None
-		self.ts						 = None
+		self.crime_df	   = None
+		self.ts		   = None
 		self.DAYS_OF_CRIME = None
 		self.CRIME_HOURS   = None
-		self.sql_query		 = None
+		self.sql_query	   = None
 
 	def find_precinct(self, address):
 		""" 
@@ -96,8 +96,8 @@ class CrimeMapper(object):
 		and murder.
 		"""
 		self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
-									+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
-									+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTE\''
+				+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
+				+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTE\''
 
 		conn = sqlite3.connect('./data/CrimeTime.db')
 
@@ -144,11 +144,11 @@ class CrimeMapper(object):
 
 		if(dont_continue == False):
 			self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
-									+ str(self.prec) + ' AND OFFENSE = \'' \
-									+ str(self.crime_name) + '\' ' 
+					+ str(self.prec) + ' AND OFFENSE = \'' \
+					+ str(self.crime_name) + '\' ' 
 
-			conn = sqlite3.connect('../data/CrimeTime.db')
-			#conn = sqlite3.connect('./data/CrimeTime.db')
+			#conn = sqlite3.connect('../data/CrimeTime.db')
+			conn = sqlite3.connect('./data/CrimeTime.db')
 
 			## The crime dataframe for the selected police precint.
 			self.crime_df = pd.read_sql_query(self.sql_query, conn)

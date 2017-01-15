@@ -141,8 +141,8 @@ def all_crimes(CT, borough):
 	# Have to save the image this way so that the program can be run on AWS
 	io = StringIO()
 	fig.savefig(io, format='png')
-	map = base64.encodestring(io.getvalue())
-	map = urllib.quote(map.rstrip('\n'))
+	precinct_map = base64.encodestring(io.getvalue())
+	precinct_map = urllib.quote(precinct_map.rstrip('\n'))
 
 	#######################################################
 	# make breakdown of stuff
@@ -171,10 +171,10 @@ def all_crimes(CT, borough):
 	trends = urllib.quote(trends.rstrip('\n'))
 
 	return render_template("AllCrimes.html",
-													map=map,
-													trends=trends,
-													crime_info = crime_info,
-													precinct_info=precinct_info)
+				precinct_map=precinct_map,
+				trends=trends,
+				crime_info = crime_info,
+				precinct_info=precinct_info)
 
 
 def future(CT, crime_type, borough):
@@ -224,8 +224,8 @@ def future(CT, crime_type, borough):
 	# Have to save the image this way so that the program can be run on AWS
 	io = StringIO()
 	fig.savefig(io, format='png')
-	map = base64.encodestring(io.getvalue())
-	map = urllib.quote(map.rstrip('\n'))
+	precinct_map = base64.encodestring(io.getvalue())
+	precinct_map = urllib.quote(precinct_map.rstrip('\n'))
 
 	fig2 = plt.figure(figsize=(7, 6))
 	plt.clf()
@@ -240,7 +240,7 @@ def future(CT, crime_type, borough):
 	SAR.forecast_results.ix[-24:].plot(linewidth=3)
 	plt.ylabel('Monthly Incidents', fontsize=13)
 	title = 'Future monthly ' + crime_type +\
-					' rates in Precinct ' + str(precinct)
+		' rates in Precinct ' + str(precinct)
 	plt.title(title,fontsize=13)
 	# Have to save the image this way so that the program can be run on AWS
 	io2 = StringIO()
@@ -251,10 +251,10 @@ def future(CT, crime_type, borough):
 	
 
 	return render_template("future.html", 
-													crime_info = crime_info,
-													precinct_info=precinct_info,
-													map=map,
-													future=future)
+				crime_info = crime_info,
+				precinct_info=precinct_info,
+				precinct_map=precinct_map,
+				future=future)
 	
 	
 def historical(CT, prec, crime_type):
@@ -318,8 +318,8 @@ def historical(CT, prec, crime_type):
 	plt.clf()
 	CT.percent_per_day()
 	title = 'Percentage of ' +\
-				crime_type +' in Precinct ' +\
-				str(precinct) + ' by day of week' 
+		crime_type +' in Precinct ' +\
+		str(precinct) + ' by day of week' 
         
 	fig = plt.figure(figsize=(9, 8))
         
@@ -340,8 +340,8 @@ def historical(CT, prec, crime_type):
 	plt.clf()
 	CT.percent_per_hour()
 	title = 'Percentage of ' +crime_type +\
-						' in Precinct ' + str(precinct) +\
-						' by time of day' 
+		' in Precinct ' + str(precinct) +\
+		' by time of day' 
 
 	fig = plt.figure(figsize=(8, 8))
 	CT.CRIME_HOURS.plot(kind='bar')
@@ -366,9 +366,9 @@ def historical(CT, prec, crime_type):
 
 	# push the produced images to the output website page
 	return render_template("historical.html", 
-													crime_info = crime_info,
-													trend=trend,
-													decomp=decompose,
-													day=days,
-													hour=hours)
+				crime_info = crime_info,
+				trend=trend,
+				decomp=decompose,
+				day=days,
+				hour=hours)
 		
