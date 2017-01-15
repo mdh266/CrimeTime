@@ -70,8 +70,7 @@ To build the documentation, run the following command in the CrimeTime directory
 
 *doxygen doc/Doxfile*
 
-
-
+a directory called html will be created open the file "index.html" in the html directory.
 
 
 
