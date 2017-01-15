@@ -31,64 +31,95 @@ class Seasonal_Arima(object):
 		"""
 		
 		training_start = datetime.strptime("2006-1-31","%Y-%m-%d")
+
+		## Dates for the training set time series
 		self.training_date_list = [training_start 
 				+ relativedelta(months=x) for x in range(0,108)]
 
 		validation_start = datetime.strptime("2014-1-31","%Y-%m-%d")
+		## Dates for the validation set time series
 		self.validation_date_list = [validation_start 
 				+ relativedelta(months=x) for x in range(0,12)]
 
 		test_start = datetime.strptime("2015-1-31","%Y-%m-%d")
+
+		## Dates for the test set time series
 		self.test_date_list = [test_start 
 				+ relativedelta(months=x) for x in range(0,12)]
 	
 		forecast_start = datetime.strptime("2016-1-31","%Y-%m-%d")
+
+		## Dates for the forecasting time series
 		self.forecast_date_list = [forecast_start 
 				+ relativedelta(months=x) for x in range(0,24)]
 
-		# errors in the model
+		## Errors in the model in the grid search
 		self.errors = []
 		
-		# PQD values for the mdoel
+		## Grid search (p,q,d) and (P, Q, D) values for the model 
 		self.PDQ_vals = []
-	
+		
+		## The p values in ARIMA
 		self.p = None
+		
+		## The q values in ARIMA
 		self.q = None
+
+		## The d values in ARIMA
 		self.d = None
+
+		## The P values in ARIMA
 		self.P = None
+
+		## The D values in ARIMA
 		self.D = None
+
+		## The Q values in ARIMA
 		self.Q = None
 		
+		## The RMS error on the test
 		self.test_error = None
 
+		## Starting index for the training set
 		self.training_begin = 0
+	
+		## Ending index for the training set
 		self.training_end   = 108
 
+		## Starting index for the validation set
 		self.validation_begin = 96
+
+		## Starting index for the validation set
 		self.validation_end   = 108
-		
+
+		## Starting index for the test set
 		self.test_begin	    = 108
+
+		## Starting index for the test set
 		self.test_end	    = 120
 
+		## Starting index for the forecasting set
 		self.forecast_begin = 120
+
+		## Starting index for the forecasting set
 		self.forecast_end   = 144
 			
-		# make the training set time series from CrimeMapper object
-		self.training = pd.DataFrame(index=self.training_date_list,
+		## The training set time series data
+		self.training  =  pd.DataFrame(index=self.training_date_list,
 						columns=['Recorded',	
 							 'Predicted'])
-
+		
 		self.training['Recorded'] = CT.ts[self.training_begin:self.training_end]
 
 
-		# make the validation set time series from CrimeMapper object
+		## The validation set time series data
 		self.validation = pd.DataFrame(index=self.validation_date_list,
 						columns=['Recorded',
 							 'Predicted'])
 
 		self.validation['Recorded'] = CT.ts[self.validation_begin:self.validation_end]
 
-		# make the test set
+		## The test set time series data
 		self.test = pd.DataFrame(index=self.test_date_list,
 						columns=['Recorded',
 					 	 	 'Predicted'])

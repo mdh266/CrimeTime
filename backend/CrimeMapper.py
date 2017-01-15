@@ -37,19 +37,36 @@ class CrimeMapper(object):
 		"""
 		
 		## Police precinct geopandas dataframe
-		self.geo_df     = gpd.read_file("../data/NYC_Police_Precincts.geojson")
-		#self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
+		self.geo_df = gpd.read_file("./data/NYC_Police_Precincts.geojson")
 	
-		# other data members
+		## boolean as to whether the precinct was found in the find_precinct call
 		self.prec_found    = None
+
+		## The location dictionary returned by geopy
 		self.location      = None
+
+		## Address of the location from geopy
 		self.address       = None 
+
+		## Precinct of the address
 		self.prec	   = None
+		
+		## The name crime the user input
 		self.crime_name    = None
+
+		## Dataframe which contains all the crime data for precinct and type of crime
 		self.crime_df	   = None
+
+		## Dataframe monthly crime data
 		self.ts		   = None
+
+		## Dataframe that has all days in the week and the crimes occurring each day
 		self.DAYS_OF_CRIME = None
+
+		## Dataframe that has all the hours in the day and the crimes occurring each hour
 		self.CRIME_HOURS   = None
+
+		## sql_query to 
 		self.sql_query	   = None
 
 	def find_precinct(self, address):
@@ -225,8 +242,8 @@ class CrimeMapper(object):
 		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
 								+ str(self.prec)
 		
-		#conn = sqlite3.connect('./data/CrimeTime.db')
-		conn = sqlite3.connect('../data/CrimeTime.db')
+		conn = sqlite3.connect('./data/CrimeTime.db')
+		#conn = sqlite3.connect('../data/CrimeTime.db')
 		df = pd.read_sql_query(sql_query, conn)
 		conn.close()
 	

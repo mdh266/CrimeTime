@@ -31,7 +31,7 @@ class PreProcessor(object):
 		This function is does all the work to make the crime data base.
 		"""
 		## The csv file of crime data downloaded from NYC Open Data
-		self.address = "../data/NYPD_7_Major_Felony_Incident_Map.csv"
+		self.address = "./data/NYPD_7_Major_Felony_Incident_Map.csv"
     
 		crime_df = pd.read_csv(self.address,index_col=None)
 
@@ -147,7 +147,7 @@ class PreProcessor(object):
 		conn.close()
 		
 if __name__ == "__main__":
-	PreProcess = PreProcessor("../data/CrimeTime.db")
-	#PreProcess.make_NYC_Crime_database("NYC_Crime")
+	PreProcess = PreProcessor("./data/CrimeTime.db")
+	PreProcess.make_NYC_Crime_database("NYC_Crime")
 	PreProcess.make_NYC_precinct_database()
 	
