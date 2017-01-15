@@ -31,14 +31,21 @@ class CrimeMapper(object):
 	"""    
 	geolocator = Nominatim()
     
-	def __init__(self):
+	def __init__(self, mode):
 		"""
 		Constructor just makes a geopandas dataframe based off the police precincts.
 		"""
-		
-		## Police precinct geopandas dataframe
-		self.geo_df = gpd.read_file("./data/NYC_Police_Precincts.geojson")
+		## Boolean to know to run in production mode, changes location of database
+		self.production_mode = mode
 	
+		## Police precinct geopandas dataframe
+		self.geo_df = None
+
+		if self.production_mode == True:
+			self.geo_dfgpd.read_file("./data/NYC_Police_Precincts.geojson")
+		else:
+			self.geo_dfgpd.read_file("../data/NYC_Police_Precincts.geojson")
+		
 		## boolean as to whether the precinct was found in the find_precinct call
 		self.prec_found    = None
 
@@ -116,7 +123,10 @@ class CrimeMapper(object):
 				+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
 				+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTE\''
 
-		conn = sqlite3.connect('./data/CrimeTime.db')
+		if self.production_mode == True:
+			conn = sqlite3.connect('./data/CrimeTime.db')
+		else:
+			conn = sqlite3.connect('../data/CrimeTime.db')
 
 		## The crime dataframe for the selected police precint.
 		df = pd.read_sql_query(self.sql_query, conn)
@@ -164,8 +174,10 @@ class CrimeMapper(object):
 					+ str(self.prec) + ' AND OFFENSE = \'' \
 					+ str(self.crime_name) + '\' ' 
 
-			#conn = sqlite3.connect('../data/CrimeTime.db')
-			conn = sqlite3.connect('./data/CrimeTime.db')
+			if self.production_mode == True:
+				conn = sqlite3.connect('./data/CrimeTime.db')
+			else:
+				conn = sqlite3.connect('../data/CrimeTime.db')
 
 			## The crime dataframe for the selected police precint.
 			self.crime_df = pd.read_sql_query(self.sql_query, conn)
@@ -241,9 +253,12 @@ class CrimeMapper(object):
 		"""
 		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
 								+ str(self.prec)
-		
-		conn = sqlite3.connect('./data/CrimeTime.db')
-		#conn = sqlite3.connect('../data/CrimeTime.db')
+
+		if self.production_mode == True:		
+			conn = sqlite3.connect('./data/CrimeTime.db')
+		else:
+			conn = sqlite3.connect('../data/CrimeTime.db')
+
 		df = pd.read_sql_query(sql_query, conn)
 		conn.close()
 	

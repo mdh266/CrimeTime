@@ -72,7 +72,7 @@ def crime_time_output():
 	address = street + ' ' + borough
 	timeline = str(request.args.get('timeline'))
 
-	CT = CrimeMapper()
+	CT = CrimeMapper(True)
 	if CT.find_precinct(address) == False:
 		return render_template("error.html")
 	else:
