@@ -80,7 +80,7 @@ def crime_time_output():
 			return all_crimes(CT, borough)
 		else:
 			CT.get_crime_data(crime_type)
-			CT.make_timeseries()
+			CT.make_time_series()
 			## police precinct of the address
 			precinct = int(CT.get_precinct())
 			CT.geo_df['precinct'] = CT.geo_df['precinct'].astype(int)

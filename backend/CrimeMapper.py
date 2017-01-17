@@ -31,20 +31,20 @@ class CrimeMapper(object):
 	"""    
 	geolocator = Nominatim()
     
-	def __init__(self, mode):
+	def __init__(self, production_mode):
 		"""
 		Constructor just makes a geopandas dataframe based off the police precincts.
 		"""
 		## Boolean to know to run in production mode, changes location of database
-		self.production_mode = mode
+		self.production_mode = production_mode
 	
 		## Police precinct geopandas dataframe
 		self.geo_df = None
 
 		if self.production_mode == True:
-			self.geo_dfgpd.read_file("./data/NYC_Police_Precincts.geojson")
+			self.geo_df = gpd.read_file("./data/NYC_Police_Precincts.geojson")
 		else:
-			self.geo_dfgpd.read_file("../data/NYC_Police_Precincts.geojson")
+			self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
 		
 		## boolean as to whether the precinct was found in the find_precinct call
 		self.prec_found    = None
@@ -111,7 +111,8 @@ class CrimeMapper(object):
  					self.prec = int(self.geo_df.loc[i,'precinct'])
 					self.prec_found = True
 
-			return self.prec_found
+			if self.production_mode:
+				return self.prec_found
 
 
 	def get_all_crime_data(self):
@@ -190,7 +191,7 @@ class CrimeMapper(object):
 		"""
 		return datetime.strptime(row, '%m/%d/%Y %I:%M:%S %p').date()
     
-	def make_timeseries(self):
+	def make_time_series(self):
 		""" 
 		Turn the dataframe into a pandas series with daily events.
 		"""
@@ -290,6 +291,7 @@ class CrimeMapper(object):
 		plt.plot(trend_crime, label='Trend', linewidth=3)
 		plt.title(title,fontsize=13)
 		plt.xlabel('Year', fontsize=13)
+		plt.legend()
 
 
 	def plot_per_day(self):
