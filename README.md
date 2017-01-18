@@ -16,31 +16,19 @@ library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>.
 
 **Dependenices**
 
-1.) Python 2
-
-2.) SQLite
-
-3.) StatsModels (0.8.0rc1)
-
-3.) Pandas (0.19.1)
-
-4.) GeoPandas (0.2.1)
-
-5.) Geopy (1.11.0)
-
-6.) Shapely (1.5.17)
-
-8.) Flask (0.11.1)
-
-9.) Basemap (1.0.7)
-
-10.) Matplotlib (1.5.3)
-
-12.) Numpy (1.11.2)
-
-13.) Beautifulsoup4 (4.5.3)
-
-14.) Doxygen (only to build documentation)
+1. Python 2
+2. SQLite
+3. StatsModels (0.8.0rc1)
+4. Pandas (0.19.1)
+5. GeoPandas (0.2.1)
+6. Geopy (1.11.0)
+7. Shapely (1.5.17)
+8. Flask (0.11.1)
+9. Basemap (1.0.7)
+10. Matplotlib (1.5.3)
+12. Numpy (1.11.2)
+13. Beautifulsoup4 (4.5.3)
+14. Doxygen (only to build documentation)
 
 
 **Installation**

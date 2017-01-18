@@ -93,13 +93,12 @@ class CrimeMapper(object):
 		if(self.location == None):
 			return self.prec_found
 		else:
-			## Address of the location 
 			self.address = self.location.address
 	
 			# Get the longitude and latitude of the address
 			point =  Point(self.location.longitude, self.location.latitude)
 
-			## Central coordinates for NYC
+			# Central coordinates for NYC
 			self.nyc_coor = [40.7128,-74.0059]
 
  			# Loop through all the NYC precincts geometries and
@@ -107,7 +106,6 @@ class CrimeMapper(object):
 			N = self.geo_df.shape[0]
 			for i in range(0,N):
 	 			if(point.within(self.geo_df.loc[i,'geometry'])):
-					## Precinct of the address
  					self.prec = int(self.geo_df.loc[i,'precinct'])
 					self.prec_found = True
 
@@ -129,7 +127,7 @@ class CrimeMapper(object):
 		else:
 			conn = sqlite3.connect('../data/CrimeTime.db')
 
-		## The crime dataframe for the selected police precint.
+		# The crime dataframe for the selected police precint.
 		df = pd.read_sql_query(self.sql_query, conn)
 		conn.close()
 		self.crime_df = df[df.OFFENSE == 'FELONY ASSAULT'] 
@@ -180,7 +178,7 @@ class CrimeMapper(object):
 			else:
 				conn = sqlite3.connect('../data/CrimeTime.db')
 
-			## The crime dataframe for the selected police precint.
+			# The crime dataframe for the selected police precint.
 			self.crime_df = pd.read_sql_query(self.sql_query, conn)
 			conn.close()
         
