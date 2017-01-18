@@ -57,29 +57,28 @@
 	<div class="container">
 
     <div class="starter-template">
-				<h2> About CrimeTime </h2>
-				</br>
-				<p>
-			  This web application was project at <a href="http://insightdatascience.com/">Insight Data Science</a>. 
-				It built was written in <a href="https://www.python.org/"> Python</a> and <a href="http://flask.pocoo.org/"> Flask</a>
-				and was deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a>  Users are prompted to enter an address and then
-				I use the <a href="https://pypi.python.org/pypi/geopy">geopy</a> library to get
-				the latitude and longitude of the address.  Once that latitude and longitude are known I 
-				use the <a href="https://pypi.python.org/pypi/Shapely">shapely</a> library to find out which police 
-				precinct the address is in and obtain the data on that police precinct.
-				</br>
-				</br>
-				The info for police precincts was obtained by scraping the NYPD's <a href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml"> website </a> using <a href="https://pypi.python.org/pypi/beautifulsoup4"> beautifulsoup</a> library and also this specific <a href="https://nycopendata.socrata.com/Public-Safety/Police-Precincts/78dh-3ptz/data">database</a> on the NYC Open Data Website.
-				The crime data was obtained from the <a href="https://nycopendata.socrata.com/">NYC Open Data Website</a> and cleaning was completed using <a href="http://pandas.pydata.org/">Pandas</a> and <a href="http://geopandas.org/">GeoPandas</a>. The data was then stored in a <a href="https://sqlite.org/">SQLite</a> database. Forecasted crime rates were predicted using a <a href="http://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html">seasonal ARIMA</a> model through the python
-				library <a href="http://statsmodels.sourceforge.net/"> StatsModels</a>. I used a grid search to obtain the appropriate model paramaters that minimize the validation error.
-				</br>
-				</br>
-				The source code for this project can be found <a href="https://github.com/mdh266/CrimeTime">here</a>.
-				</br>
-				</br>
-				For information how the code works see this <a href="https://github.com/mdh266/CrimeTime">post</a>. 				
-				</p> 
-
+    <h2> About CrimeTime </h2>
+    </br>
+        <p>
+        This web application was project at <a href="http://insightdatascience.com/">Insight Data Science</a>. 
+        It built was written in <a href="https://www.python.org/"> Python</a> and <a href="http://flask.pocoo.org/"> Flask</a>
+        and was deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a>  Users are prompted to enter an address and then
+        I use the <a href="https://pypi.python.org/pypi/geopy">geopy</a> library to get
+        the latitude and longitude of the address.  Once that latitude and longitude are known I 
+        use the <a href="https://pypi.python.org/pypi/Shapely">shapely</a> library to find out which police 
+        precinct the address is in and obtain the data on that police precinct.
+        </br>
+        </br>
+        The info for police precincts was obtained by scraping the NYPD's <a href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml"> website </a> using <a href="https://pypi.python.org/pypi/beautifulsoup4"> beautifulsoup</a> library and also this specific <a href="https://nycopendata.socrata.com/Public-Safety/Police-Precincts/78dh-3ptz/data">database</a> on the NYC Open Data Website.
+        The crime data was obtained from the <a href="https://nycopendata.socrata.com/">NYC Open Data Website</a> and cleaning was completed using <a href="http://pandas.pydata.org/">Pandas</a> and <a href="http://geopandas.org/">GeoPandas</a>. The data was then stored in a <a href="https://sqlite.org/">SQLite</a> database. Forecasted crime rates were predicted using a <a href="http://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html">seasonal ARIMA</a> model through the python
+        library <a href="http://statsmodels.sourceforge.net/"> StatsModels</a>. I used a grid search to obtain the appropriate model paramaters that minimize the validation error.
+        </br>
+        </br>
+        The source code for this project can be found <a href="https://github.com/mdh266/CrimeTime">here</a>.
+        </br>
+        </br>
+        For information how the code works see this <a href="https://github.com/mdh266/CrimeTime">post</a>. 				
+        </p> 
     </div>
 
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
