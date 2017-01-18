@@ -274,7 +274,7 @@ def historical(CT, prec, crime_type):
 
 	plt.clf()
 	title = 'Seasonality Of Crimes Involving ' + crime_type +\
-					' in Precinct ' + str(precinct)
+		' in Precinct ' + str(precinct)
 	decomp_crime = seasonal_decompose(CT.ts,freq=12)
 	season_crime = decomp_crime.seasonal
 	plt.plot(season_crime, label='Seasonality', linewidth=3)
@@ -296,7 +296,7 @@ def historical(CT, prec, crime_type):
 	y_max = float(CT.ts.max())
 	#print y_min
 	title = 'Decomposition Of Crimes Involving ' +crime_type +\
-					' in Precinct ' + str(precinct)
+		' in Precinct ' + str(precinct)
 
 	fig = plt.figure(figsize=(7, 6))
 	plt.title(title , fontsize=13)	

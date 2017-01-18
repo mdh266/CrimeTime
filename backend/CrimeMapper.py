@@ -253,7 +253,7 @@ class CrimeMapper(object):
 		Returns the police precinct info for the selected precinct
 		"""
 		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
-								+ str(self.prec)
+				+ str(self.prec)
 
 		if self.production_mode == True:		
 			conn = sqlite3.connect('./data/CrimeTime.db')
@@ -302,8 +302,8 @@ class CrimeMapper(object):
 		self.percent_per_day()
 		
 		title = 'Percentage of ' +\
-				self.crime_name +' in Precinct ' +\
-				str(self.prec) + ' by day of week' 
+			self.crime_name +' in Precinct ' +\
+			str(self.prec) + ' by day of week' 
         
 		fig = plt.figure(figsize=(8, 5))
   	      
@@ -321,8 +321,8 @@ class CrimeMapper(object):
 		plt.clf()
 		self.percent_per_hour()
 		title = 'Percentage of ' + self.crime_name +\
-						' in Precinct ' + str(self.prec) +\
-						' by time of day' 
+			' in Precinct ' + str(self.prec) +\
+			' by time of day' 
 
 		fig = plt.figure(figsize=(8, 5))
 		self.CRIME_HOURS.plot(kind='bar')
