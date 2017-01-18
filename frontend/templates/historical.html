@@ -57,37 +57,36 @@
 	
 
 		<div class="container">
-		    <h3> Your Neighborhood's Crime Historical Rates.</h3> </br>
-		    </br>
-				<b> Below (left) is the actual monthly {{crime_info.crime_type}} crime rates in your precinct in blue, 
-				with the trend in red.  
-				Below (right) is the seasonality of the monthly {{crime_info.crime_type}} crime rates in your precinct.
-        </b> 
+		<h3> Your Neighborhood's Crime Historical Rates.</h3> </br>
+		</br>
+				<b> Below (left) is the actual monthly {{crime_info.crime_type}} crime rates in your precinct in blue, with the trend in red.  
+				Below (right) is the seasonality of the monthly {{crime_info.crime_type}} crime rates in your precinct.			</b> 
     </div>
-	  <table style="width:100%">
-      <tr>
-		      <td>
-	 	      <img src="data:image/png;base64,{{ decomp }}" height=400px width=500px \>
-		      </td>
-		      <td>
-			    <img src="data:image/png;base64,{{ trend }}" height=400px width=500px >
-		      </td>
-	    </tr>
+	<table style="width:100%">
+	<tr>
+		<td>
+	 	<img src="data:image/png;base64,{{ decomp }}" height=400px width=500px \>
+		</td>
+		<td>
+			<img src="data:image/png;base64,{{ trend }}" height=400px width=500px >
+		</td>
+	</tr>
 	</table>
 	<div class="container">
 		</br>
-    <b> Below is the breakdown of the percent of crimes per day of week (left) and hour of day (right)
-    </b> 
-  </div>
+				<b> Below is the breakdown of the percent of crimes per day of week (left) and hour of day (right)
+				</b> 
+    </div>
 	<table style="width:100%">
-	  <tr>
-		    <td>
-	 		  <img src="data:image/png;base64,{{ day }}" height=400px width=500px >
-		    </td>
-		    <td>
-			  <img src="data:image/png;base64,{{ hour }}" height=400px width=500px >
-		    </td>
-	  </tr>
+	<tr>
+		<td>
+	 		<img src="data:image/png;base64,{{ day }}" height=400px width=500px >
+		</td>
+		<td>
+			<img src="data:image/png;base64,{{ hour }}" height=400px width=500px >
+		</td>
+	</tr>
+
 	</table>
     
     <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
