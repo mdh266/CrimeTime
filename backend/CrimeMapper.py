@@ -23,6 +23,8 @@ import sys
 import os.path
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+import warnings
+warnings.filterwarnings('ignore')
 
 class CrimeMapper(object):
 	"""
