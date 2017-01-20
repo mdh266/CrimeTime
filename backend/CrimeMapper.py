@@ -133,19 +133,19 @@ class CrimeMapper(object):
 		df = pd.read_sql_query(self.sql_query, conn)
 		conn.close()
 		self.crime_df = df[df.OFFENSE == 'FELONY ASSAULT'] 
-		self.make_timeseries()
+		self.make_time_series()
 		self.assault_ts = seasonal_decompose(self.ts,freq=12).trend
 		self.crime_df = df[df.OFFENSE == 'ROBBERY'] 
-		self.make_timeseries()
+		self.make_time_series()
 		self.robbery_ts  = seasonal_decompose(self.ts,freq=12).trend
 		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY'] 
-		self.make_timeseries()
+		self.make_time_series()
 		self.larceny_ts  = seasonal_decompose(self.ts,freq=12).trend
 		self.crime_df = df[df.OFFENSE == 'BURGLARY'] 
-		self.make_timeseries()
+		self.make_time_series()
 		self.burglary_ts  = seasonal_decompose(self.ts,freq=12).trend
 		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY OF MOTOR VEHICLE'] 
-		self.make_timeseries()
+		self.make_time_series()
 		self.car_ts  = seasonal_decompose(self.ts,freq=12).trend
 
 
