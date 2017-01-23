@@ -33,8 +33,8 @@ library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>.
 
 **Installation**
 
-Download the "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data website, 
-place it in the /data/ directory. Then in the CrimeTime directory run 
+Download the file "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data website, 
+place it in the /CrimeTime/data/ directory. Then in the /CrimeTime/ directory run 
 
 *python ./backend/PreProcessor.py*
 
@@ -42,7 +42,7 @@ to build the database.
 
 **Usage**
 
-Run the command in the CrimeTime directory:
+Run the command in the /CrimeTime/ directory:
 
 *python run.py*
 
@@ -50,7 +50,7 @@ then you should see something like:
 
 *Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)*
 
-Go to the address, "http://0.0.0.0:5000/" in your webbrowser.
+Go to the address, "http://0.0.0.0:5000/" in your web browser to use the web application.
 
 **Documentation**
 
@@ -58,7 +58,7 @@ To build the documentation, run the following command in the CrimeTime directory
 
 *doxygen doc/Doxfile*
 
-a directory called html will be created open the file "index.html" in the html directory.
+a directory /CrimeTime/html/ will be created.  Open the file "index.html" in the html directory.
 
 
 
