@@ -17,7 +17,7 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-class Seasonal_Arima(object):
+class Seasonal_ARIMA(object):
 	"""
   	This class builds a seasonal based ARIMA model for the suppied time seires
 	"""
@@ -205,7 +205,7 @@ class Seasonal_Arima(object):
                                       					enforce_invertibility=True,
                                       					enforce_stationarity=True)
 	
-							result = self.mod.fit()
+							result = self.mod.fit(disp=False)
 				
 		
 							self.validation['Predicted'] = result.predict(	
@@ -251,7 +251,7 @@ class Seasonal_Arima(object):
                               		enforce_stationarity=False)
 
 
-		self.results = self.mod.fit()
+		self.results = self.mod.fit(disp=False)
 
 		self.test['Predicted'] = self.results.predict(start = self.test_begin,
                                                 	      end = self.test_end, 
@@ -289,7 +289,7 @@ class Seasonal_Arima(object):
                               		enforce_stationarity=False)
 
 
-		self.results = self.mod.fit()
+		self.results = self.mod.fit(disp=False)
 
 		self.forecast_results = self.results.predict(start = self.forecast_begin,
                                         		    end = self.forecast_end, 
@@ -310,8 +310,8 @@ class Seasonal_Arima(object):
 		Plots the predicted and recorded crime values on the test set.
 		"""
 		#plt.clf()
-		plt.plot(self.forecast_results - self.test_error, 'r')
-		plt.plot(self.forecast_results + self.test_error, 'r')
+		#plt.plot(self.forecast_results - self.test_error, 'r')
+		#plt.plot(self.forecast_results + self.test_error, 'r')
 		self.forecast_results.ix[-24:].plot(linewidth=2.5)
 		plt.ylabel('Monthlt incidents')
 		plt.xlabel('Year')  

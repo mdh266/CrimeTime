@@ -58,7 +58,7 @@ class CrimeMapper(object):
 		self.address       = None 
 
 		## Precinct of the address
-		self.prec	   = None
+		self.prec		   = None
 		
 		## The name crime the user input
 		self.crime_name    = None
@@ -67,7 +67,7 @@ class CrimeMapper(object):
 		self.crime_df	   = None
 
 		## Dataframe monthly crime data
-		self.ts		   = None
+		self.ts			   = None
 
 		## Dataframe that has all days in the week and the crimes occurring each day
 		self.DAYS_OF_CRIME = None

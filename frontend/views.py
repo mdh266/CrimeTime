@@ -31,7 +31,7 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend/")
 from CrimeMapper import CrimeMapper
-from Forcasting import Seasonal_Arima
+from Forecasting import Seasonal_ARIMA
 
 
 @app.route('/')
@@ -234,7 +234,7 @@ def future(CT, crime_type, borough):
 	# Make the forecasted crime rates
 	#######################################################
 
-	SAR = Seasonal_Arima(CT)
+	SAR = Seasonal_ARIMA(CT)
 	SAR.fit()
 	SAR.forecast()
 	#plt.plot(SAR.forecast_results.ix[-24:] - SAR.test_error, 'r-')

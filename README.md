@@ -17,7 +17,7 @@ library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>
 
 **Dependenices**
 
-1. Python 2
+1. Python 2.7
 2. SQLite
 3. StatsModels (0.8.0rc1)
 4. Pandas (0.19.1)
@@ -30,7 +30,7 @@ library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>
 12. Numpy (1.11.2)
 13. Beautifulsoup4 (4.5.3)
 14. Doxygen (only to build documentation)
-
+15. pytest (only for testing)
 
 **Installation**
 
@@ -42,7 +42,17 @@ place it in the /CrimeTime/data/ directory. Then in the /CrimeTime/ directory ru
 to build the database.
 
 
-*NOTE: If NYC Open Data no longer has the file on their website, please email me and I will provide you with the database.*
+**NOTE: If NYC Open Data no longer has the file on their website, please email me and I will provide you with the database.**
+
+
+**Testing**
+
+From the CrimeTime directory run:
+
+*py.test tests
+
+to run unit tests on code.
+
 
 **Usage**
 
