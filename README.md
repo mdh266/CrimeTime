@@ -49,7 +49,7 @@ to build the database.
 
 From the CrimeTime directory run:
 
-*py.test tests
+*py.test tests*
 
 to run unit tests on code.
 
