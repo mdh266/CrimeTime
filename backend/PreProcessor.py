@@ -140,6 +140,7 @@ class PreProcessor(object):
                              'Address':address,
                              'Telephone':numbers
                             })
+
 		# push it to the sqlite database
 		conn = sqlite3.connect(self.database_name)
 		NYC_Police_Precinct_Info.to_sql("NYC_Precint_Info", conn, 

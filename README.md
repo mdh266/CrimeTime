@@ -12,7 +12,8 @@ The crime data was provided by <a href="https://nycopendata.socrata.com/"> NYC O
 <a href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml"> website.</a> All data was cleaned and stored in a <a href="https://sqlite.org/">SQLite</a> database.
 
 Forecasted crime rates were predicted using a seasonal ARIMA model through the python
-library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>.
+library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>
+
 
 **Dependenices**
 
@@ -39,6 +40,9 @@ place it in the /data/ directory. Then in the CrimeTime directory run
 *python ./backend/PreProcessor.py*
 
 to build the database.
+
+
+*NOTE: If NYC Open Data no longer has the file on their website, please email me and I will provide you with the database.*
 
 **Usage**
 

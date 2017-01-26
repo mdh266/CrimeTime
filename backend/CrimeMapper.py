@@ -113,7 +113,7 @@ class CrimeMapper(object):
 
 			if self.production_mode:
 				return self.prec_found
-
+	
 
 	def get_all_crime_data(self):
 		"""
@@ -132,22 +132,32 @@ class CrimeMapper(object):
 		# The crime dataframe for the selected police precint.
 		df = pd.read_sql_query(self.sql_query, conn)
 		conn.close()
+
+		# Make the trend time series for all the different crimes
 		self.crime_df = df[df.OFFENSE == 'FELONY ASSAULT'] 
 		self.make_time_series()
 		self.assault_ts = seasonal_decompose(self.ts,freq=12).trend
+		self.assault_ts.dropna(inplace=True)
+
 		self.crime_df = df[df.OFFENSE == 'ROBBERY'] 
 		self.make_time_series()
 		self.robbery_ts  = seasonal_decompose(self.ts,freq=12).trend
+		self.robbery_ts.dropna(inplace=True)
+
 		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY'] 
 		self.make_time_series()
 		self.larceny_ts  = seasonal_decompose(self.ts,freq=12).trend
+		self.larceny_ts.dropna(inplace=True)
+
 		self.crime_df = df[df.OFFENSE == 'BURGLARY'] 
 		self.make_time_series()
 		self.burglary_ts  = seasonal_decompose(self.ts,freq=12).trend
+		self.burglary_ts.dropna(inplace=True)
+
 		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY OF MOTOR VEHICLE'] 
 		self.make_time_series()
 		self.car_ts  = seasonal_decompose(self.ts,freq=12).trend
-
+		self.car_ts.dropna(inplace=True)
 
 	def get_crime_data(self, crime_name):
 		"""

@@ -237,7 +237,9 @@ def future(CT, crime_type, borough):
 	SAR = Seasonal_Arima(CT)
 	SAR.fit()
 	SAR.forecast()
-	SAR.forecast_results.ix[-24:].plot(linewidth=3)
+	#plt.plot(SAR.forecast_results.ix[-24:] - SAR.test_error, 'r-')
+	#plt.plot(SAR.forecast_results.ix[-24:] + SAR.test_error, 'r-')
+	SAR.forecast_results.ix[-24:].plot(linewidth=2.5)
 	plt.ylabel('Monthly Incidents', fontsize=13)
 	title = 'Future monthly ' + crime_type +\
 		' rates in Precinct ' + str(precinct)
