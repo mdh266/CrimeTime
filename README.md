@@ -2,10 +2,9 @@
 
 *To see the web application in action visit: www.crimetime.online.*
 
-This web application was project at <a href="http://insightdatascience.com/">Insight Data Science</a>. 
+This web application was part of a 3 week project at <a href="http://insightdatascience.com/">Insight Data Science</a>. 
 It built was written in <a href="https://www.python.org/"> Python</a> and <a href="http://flask.pocoo.org/"> Flask</a>
-and was deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a>  
-Users are prompted to enter an address and then I use the <a href="https://pypi.python.org/pypi/geopy">geopy</a> library to get
+and was deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a> Users are prompted to enter an address and then I use the <a href="https://pypi.python.org/pypi/geopy">geopy</a> library to get
 the latitude and longitude of the address.  Once that latitude and longitude are known I 
 use the <a href="https://pypi.python.org/pypi/Shapely">shapely</a> library to find out which police 
 precinct the address is in and obtain the data on that police precinct.
