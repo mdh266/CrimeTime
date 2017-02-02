@@ -49,6 +49,14 @@ def contact():
 	"""
 	return render_template("contact.html")
 
+@app.route('/blogpost')
+def blogpost():
+	"""
+	Forwards the blogpost page for the website..
+	"""
+	return render_template("BlogPost.html")
+
+
 @app.route('/about')
 def about():
 	"""
