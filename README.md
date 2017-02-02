@@ -1,18 +1,22 @@
 **CRIMETIME**
 
-*Web application for visualizing and predict crime rates in New York City.*
-
 *To see the web application in action visit: www.crimetime.online.*
 
-The code was written in <a href="https://www.python.org/"> Python</a> 
-using <a href="http://flask.pocoo.org/"> Flask</a>. 
-and was deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a>
+The info for police precincts was obtained by scraping the NYPD's 
+<a href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml"> website </a> using 
+<a href="https://pypi.python.org/pypi/beautifulsoup4"> beautifulsoup</a> library and 
+also this specific
+ <a href="https://nycopendata.socrata.com/Public-Safety/Police-Precincts/78dh-3ptz/data">database</a> 
+on the NYC Open Data Website.
 
-The crime data was provided by <a href="https://nycopendata.socrata.com/"> NYC Open Data</a>. The info for police precincts was obtained through scraping the NYPD's 
-<a href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml"> website.</a> All data was cleaned and stored in a <a href="https://sqlite.org/">SQLite</a> database.
 
-Forecasted crime rates were predicted using a seasonal ARIMA model through the python
-library <a href="http://statsmodels.sourceforge.net/"> Statsmodels</a>
+The crime data was obtained from the <a href="https://nycopendata.socrata.com/">NYC Open Data Website</a> 
+and cleaning was completed using <a href="http://pandas.pydata.org/">Pandas</a> and
+<a href="http://geopandas.org/">GeoPandas</a>. The data was then stored in a 
+<a href="https://sqlite.org/">SQLite</a> database. Forecasted crime rates were predicted using a 
+<a href="http://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html">seasonal ARIMA</a>
+model through the python library <a href="http://statsmodels.sourceforge.net/"> StatsModels</a>. 
+I used a grid search to obtain the appropriate model paramaters that minimize the validation error.
 
 
 **Dependenices**
