@@ -70,11 +70,11 @@ To run this web application on your computer make sure you have obtained or buil
 database and have all the dependencies installed on you computer.  Then run the 
 command in the /CrimeTime/ directory:
 
-*python run.py*
+	python run.py	
 
 You should see something like:
 
-*Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)*
+	Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)	
 
 Enter the address http://0.0.0.0:5000/ into your web browser to use the web application.
 
@@ -85,7 +85,7 @@ Download the file "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data 
 place it in the /CrimeTime/data/ directory. Then to build the database type
 the command in the /CrimeTime/ directory,
 
-*python ./backend/PreProcessor.py*
+	python ./backend/PreProcessor.py	
 
 
 **NOTE: If NYC Open Data no longer has the file on their website, please email me and I will provide you with the database.**
@@ -95,7 +95,7 @@ the command in the /CrimeTime/ directory,
 
 To test the code to make sure it works run the following command from the /CrimeTime /directory:
 
-*py.test tests*
+	py.test tests	
 
 
 ## Documentation
