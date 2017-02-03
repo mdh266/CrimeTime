@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to CrimeTime’s documentation page! &#8212; CrimeTime  documentation</title>
+    
+    <link rel="stylesheet" href="html/_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="html/_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="/html/_static/jquery.js"></script>
+    <script type="text/javascript" src="/html/_static/underscore.js"></script>
+    <script type="text/javascript" src="/html/_static/doctools.js"></script>
+    <link rel="top" title="CrimeTime  documentation" href="#" />
+    <link rel="next" title="CrimeTime backend package" href="/html/backend.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="html/genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="html/backend.html" title="CrimeTime backend package"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">CrimeTime  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-crimetime-s-documentation-page">
+<h1>Welcome to CrimeTime&#8217;s documentation page!<a class="headerlink" href="#welcome-to-crimetime-s-documentation-page" title="Permalink to this headline">¶</a></h1>
+<p><em>To see the web application in action visit:</em> <a class="reference external" href="www.crimetime.online">www.crimetime.online</a></p>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>This web application was part of a 3 week project at <a class="reference external" href="http://insightdatascience.com/">Insight Data Science</a>.
+It built was written in <a class="reference external" href="https://www.python.org/">Python</a> and
+<a class="reference external" href="http://flask.pocoo.org/">Flask</a>
+and was deployed to <a class="reference external" href="https://aws.amazon.com/">Amazon web services</a>. Users are prompted to enter
+an address from the input page seen below.</p>
+<a class="reference internal image-reference" href="html/_images/input.png"><img alt="html/_images/input.png" src="html/_images/input.png" style="width: 300pt;" /></a>
+<p>And they get back a report on the historical trends of crimes in their neighborhood</p>
+<a class="reference internal image-reference" href="html/_images/Historical.png"><img alt="html/_images/Historical.png" src="html/_images/Historical.png" style="width: 300pt;" /></a>
+<p>Users can look at the historical data of specific crimes in their neighborhood and get
+more specific on trends, seasonality, as well as which days and time most crimes happen like the results below:</p>
+<a class="reference internal image-reference" href="html/_images/Dashboard.png"><img alt="html/_images/Dashboard.png" src="html/_images/Dashboard.png" style="width: 300pt;" /></a>
+<p>Users can also choose to forecast specific crime rates in their neighborhood into the future.</p>
+</div>
+<div class="section" id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h2>
+<p>Once the address is supplied by the user I use the
+<a class="reference external" href="https://pypi.python.org/pypi/geopy">GeoPy</a> library to get the latitude and longitude of the address.
+Once that latitude and longitude are known I
+use the <a class="reference external" href="https://pypi.python.org/pypi/Shapely">shapely</a> library to find out which police
+precinct the address is in and obtain the data on that police precinct. The info for police precincts was obtained by scraping the <a class="reference external" href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml">NYPD&#8217;s
+website</a> using
+<a class="reference external" href="https://pypi.python.org/pypi/beautifulsoup4">beautifulsoup</a> library and
+also this specific
+<a class="reference external" href="https://nycopendata.socrata.com/Public-Safety/Police-Precincts/78dh-3ptz/data">database</a>
+on the NYC Open Data Website. The crime data was obtained from the
+<a class="reference external" href="https://nycopendata.socrata.com">NYC Open Data Website</a>
+and cleaning was completed using <a class="reference external" href="http://pandas.pydata.org/">Pandas</a> and
+<a class="reference external" href="http://geopandas.org">GeoPandas</a>. The data was then stored in a <a class="reference external" href="https://sqlite.org/">SQLite</a>. Forecasted crime rates were predicted using a
+<a class="reference external" href="http://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.sarimax.SARIMAX.html&quot;">seasonal ARIMA</a>
+model through the python library <a class="reference external" href="http://statsmodels.sourceforge.net/">StatsModels</a>.
+I used a grid search to obtain the appropriate model paramaters that minimize the validation error.</p>
+<p>For specific information on the classes and methods, see the below,</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="html/backend.html">CrimeTime backend package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="html/backend.html#module-backend.CrimeMapper">CrimeMapper module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="html/backend.html#module-backend.Forecasting">Forecasting module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="html/backend.html#module-backend.PreProcessor">PreProcessor module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="html/frontend.html">CrimeTime frontend package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="html/frontend.html#module-frontend.views">views module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<ol class="arabic simple">
+<li>Python 2.7</li>
+<li>SQLite</li>
+<li>StatsModels (0.8.0rc1)</li>
+<li>Pandas (0.19.1)</li>
+<li>GeoPandas (0.2.1)</li>
+<li>Geopy (1.11.0)</li>
+<li>Shapely (1.5.17)</li>
+<li>Flask (0.11.1)</li>
+<li>Basemap (1.0.7)</li>
+<li>Matplotlib (1.5.3)</li>
+<li>Numpy (1.11.2)</li>
+<li>Beautifulsoup4 (4.5.3)</li>
+<li>Sphinx (only to build documentation)</li>
+<li>pytest (only for testing)</li>
+</ol>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Download the file &#8220;NYPD_7_Major_Felony_Incident_Map.csv&#8221; from the NYC Open Data website,
+place it in the /CrimeTime/data/ directory. Then in the /CrimeTime/ directory run</p>
+<p><em>python ./backend/PreProcessor.py</em></p>
+<p>to build the database.</p>
+<p><strong>NOTE: If NYC Open Data no longer has the file on their website, please email me and I will provide you with the database.</strong></p>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>From the CrimeTime directory run:</p>
+<p><em>py.test tests</em></p>
+<p>to run unit tests on code.</p>
+</div>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<p>Run the command in the /CrimeTime/ directory:</p>
+<p><em>python run.py</em></p>
+<p>then you should see something like:</p>
+<p><em>Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)</em></p>
+<p>Go to the address, &#8220;<a class="reference external" href="http://0.0.0.0:5000/">http://0.0.0.0:5000/</a>&#8221; in your web browser to use the web application.</p>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to CrimeTime&#8217;s documentation page!</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#testing">Testing</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="html/backend.html"
+                        title="next chapter">CrimeTime backend package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="html/_sources/index.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="html/genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="html/py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="html/backend.html" title="CrimeTime backend package"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">CrimeTime  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Michael Harmon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    </div>
+  </body>
+</html>
