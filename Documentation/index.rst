@@ -50,7 +50,7 @@ website <http://www.nyc.gov/html/nypd/html/home/precincts.shtml>`_ using
 `beautifulsoup <https://pypi.python.org/pypi/beautifulsoup4>`_ library and 
 also this specific 
 `database <https://nycopendata.socrata.com/Public-Safety/Police-Precincts/78dh-3ptz/data>`_
-on the NYC Open Data Website. The crime data was obtained from the 
+on the NYC Open Data Website. The historical crime data was obtained from the 
 `NYC Open Data Website <https://nycopendata.socrata.com>`_
 and cleaning was completed using `Pandas <http://pandas.pydata.org/>`_ and
 `GeoPandas <http://geopandas.org>`_. The data was then stored in a `SQLite

@@ -1,4 +1,4 @@
-# CrimeTime: Exploring and forecasting crime rates in NYC
+# CrimeTime: Predicting crime rates in NYC
 
 
 *To see the web application in action visit:* <a href="http://crimetime.online"> www.crimetime.online</a>
@@ -38,7 +38,7 @@ The info for police precincts was obtained by scraping the NYPD's
 <a href="https://pypi.python.org/pypi/beautifulsoup4"> beautifulsoup</a> library and 
 also this specific
  <a href="https://nycopendata.socrata.com/Public-Safety/Police-Precincts/78dh-3ptz/data">database</a> 
-on the NYC Open Data Website. The crime data was obtained from the <a href="https://nycopendata.socrata.com/">NYC Open Data Website</a> 
+on the NYC Open Data Website. The historical crime data was obtained from the <a href="https://nycopendata.socrata.com/">NYC Open Data Website</a> 
 and cleaning was completed using <a href="http://pandas.pydata.org/">Pandas</a> and
 <a href="http://geopandas.org/">GeoPandas</a>. The data was then stored in a 
 <a href="https://sqlite.org/">SQLite</a> database. Forecasted crime rates were predicted using a 
