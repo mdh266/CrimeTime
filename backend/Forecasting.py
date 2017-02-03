@@ -17,18 +17,52 @@ import numpy as np
 import warnings
 warnings.filterwarnings('ignore')
 
-class Seasonal_Arima(object):
+class Seasonal_ARIMA:
 	"""
-  	This class builds a seasonal based ARIMA model for the suppied time seires
+  	This class builds a seasonal based ARIMA model using 
+	`StatsModels <http://statsmodels.sourceforge.net/0.6.0/generated/statsmodels.tsa.arima_model.ARIMA.html>`_.
+	
+	**CT** is the ( :class:`backend.CrimeMapper.CrimeMapper` ) object that 
+	has the crime data for this precinct.  
+
+	**Note:** make_time_series() needs to have been called before.
+		
+	:attributes:
+		
+		**training_date_list** (list) :
+			Training date set, contains months from 1/2006 - 12/2014.
+
+		**validation_date_list** (list) :
+			Validation date set, contains months from 1/2014 - 12/2014.
+
+		**test_date_list** (list) :
+			Test date set, contains months from 1/2015 - 12/2015.
+
+		**forecast_date_list** (list) :
+			Forecasting date set, contains months from 1/2016 - 12/2017.
+
+
+		**params** (list)
+			The p,d,q,P,D,Q values in the Seasonal ARIMA model.
+
+		**test_error** (float)
+			The root mean square error in our model.
+		
+		**training** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_)
+			The training set recorded and predicted monthly crime rates.
+
+		**validation** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_)
+			The validation set recorded and predicted monthly crime rates.
+
+		**test** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_)
+			The test set recorded and predicted monthly crime rates.
+
+	:methods:
+	--------
 	"""
 
 	def __init__(self, CT):
 		"""
-		Input = CT is the CrimeMapper object
-		training set : 1/2006 - 12/2014
-		validation set : 1/2014 - 12/2014
-		test set : 1/2015 - 12/2015
-		
 		The constructor builds the training, validation and test set from the 
 		CrimeMapper object and also initializes the data members to be zero.
 		"""
@@ -60,28 +94,28 @@ class Seasonal_Arima(object):
 		self.df = pd.DataFrame(data=CT.ts,columns=['Crimes'])
 
 		## Errors in the model in the grid search
-		self.errors = []
+		self._errors = []
 		
 		## Grid search (p,q,d) and (P, Q, D) values for the model 
-		self.PDQ_vals = []
+		self._PDQ_vals = []
 		
 		## The p values in ARIMA
-		self.p = None
+		self._p = None
 		
 		## The q values in ARIMA
-		self.q = None
+		self._q = None
 
 		## The d values in ARIMA
-		self.d = None
+		self._d = None
 
 		## The P values in ARIMA
-		self.P = None
+		self._P = None
 
 		## The D values in ARIMA
-		self.D = None
+		self._D = None
 
 		## The Q values in ARIMA
-		self.Q = None
+		self._Q = None
 
 		## List of the [p,d,q,P,D,Q] values for seasonal ARIMA
 		self.params = None
@@ -90,35 +124,35 @@ class Seasonal_Arima(object):
 		self.test_error = None
 
 		## Starting index for the training set
-		self.training_begin = 0
+		self._training_begin = 0
 	
 		## Ending index for the training set
-		self.training_end   = 108
+		self._training_end   = 108
 
 		## Starting index for the validation set
-		self.validation_begin = 96
+		self._validation_begin = 96
 
 		## Starting index for the validation set
-		self.validation_end   = 108
+		self._validation_end   = 108
 
 		## Starting index for the test set
-		self.test_begin	    = 108
+		self._test_begin	    = 108
 
 		## Starting index for the test set
-		self.test_end	    = 120
+		self._test_end	    = 120
 
 		## Starting index for the forecasting set
-		self.forecast_begin = 120
+		self._forecast_begin = 120
 
 		## Starting index for the forecasting set
-		self.forecast_end   = 144
+		self._forecast_end   = 144
 			
 		## The training set time series data
 		self.training  =  pd.DataFrame(index=self.training_date_list,
 						columns=['Recorded',	
 							 'Predicted'])
 		
-		self.training['Recorded'] = CT.ts[self.training_begin:self.training_end]
+		self.training['Recorded'] = CT.ts[self._training_begin:self._training_end]
 
 
 		## The validation set time series data
@@ -126,19 +160,22 @@ class Seasonal_Arima(object):
 						columns=['Recorded',
 							 'Predicted'])
 
-		self.validation['Recorded'] = CT.ts[self.validation_begin:self.validation_end]
+		self.validation['Recorded'] = CT.ts[self._validation_begin:self._validation_end]
 
 		## The test set time series data
 		self.test = pd.DataFrame(index=self.test_date_list,
 						columns=['Recorded',
 					 	 	 'Predicted'])
 
-		self.test['Recorded'] = CT.ts[self.test_begin:self.test_end]
+		self.test['Recorded'] = CT.ts[self._test_begin:self._test_end]
 
 
 	def stationarity(self, timeseries):
 		"""
-		Perform Dickey-Fuller test:
+		Performs Dickey-Fuller test for stationarity and plots the results.
+
+		:parameters: (`Pandas <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.html>`_)
+			The Pandas Series of the monthly crime data.
 		"""
 		# used from 
 		#http://www.seanabu.com/2016/03/22/time-series-seasonal-ARIMA-model-in-python/
@@ -173,7 +210,7 @@ class Seasonal_Arima(object):
 
 	def seasonal_first_diff(self):
 		"""
-		Obtains the first seasonal difference and performs Dickey-Fuller test for stationarity
+		Obtains the first seasonal difference and performs Dickey-Fuller test for stationarity.
 		"""
 		print "\nSeasonal First Difference:\n"
 		self.df['first_seasonal_diff'] = self.df.first_diff - self.df.first_diff.shift(12)
@@ -187,7 +224,7 @@ class Seasonal_Arima(object):
 		error on the validation set. 
 
 		Then forecast it into 2015 which is the test set, which it has NOT
-		seen.  Then get the error on this set.  
+		seen. Then get the error on this set.  
 		"""
 
 		#####################################################################	
@@ -200,21 +237,21 @@ class Seasonal_Arima(object):
 					for Q in range(0,3):
 						try:
 							self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                               						order=(p,1,q),
+                               							order=(p,1,q),
                                       					seasonal_order=(P,1,Q,12),
                                       					enforce_invertibility=True,
                                       					enforce_stationarity=True)
 	
-							result = self.mod.fit()
+							result = self.mod.fit(disp=False)
 				
 		
 							self.validation['Predicted'] = result.predict(	
-									start=self.validation_begin,
-                        			                        end=self.validation_end,
+															start=self._validation_begin,
+                        			                        end=self._validation_end,
                                                 			dynamic=True)
 
 
-							self.errors.append( np.sqrt(sum(
+							self._errors.append( np.sqrt(sum(
                              					 (self.validation['Predicted']-\
                                					self.validation['Recorded'])**2)\
                                					/len(self.validation['Predicted'])))
@@ -222,7 +259,7 @@ class Seasonal_Arima(object):
 
 							values = [p,1,q,P,1,Q]
 	
-							self.PDQ_vals.append(values)
+							self._PDQ_vals.append(values)
 						except:
 							pass
 
@@ -235,27 +272,27 @@ class Seasonal_Arima(object):
 
 		self.training = pd.concat([self.training, future])
 
-		self.index = np.argmin(self.errors)
+		self._index = np.argmin(self._errors)
 		
-		self.p = self.PDQ_vals[self.index][0]
-		self.d = self.PDQ_vals[self.index][1]
-		self.q = self.PDQ_vals[self.index][2]
-		self.P = self.PDQ_vals[self.index][3]
-		self.D = self.PDQ_vals[self.index][4]
-		self.Q = self.PDQ_vals[self.index][5]
+		self._p = self._PDQ_vals[self._index][0]
+		self._d = self._PDQ_vals[self._index][1]
+		self._q = self._PDQ_vals[self._index][2]
+		self._P = self._PDQ_vals[self._index][3]
+		self._D = self._PDQ_vals[self._index][4]
+		self._Q = self._PDQ_vals[self._index][5]
 
 		self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                              		order=(self.p,self.d,self.q),
-                              		seasonal_order=(self.P,self.D,self.Q,12),
+                              		order=(self._p,self._d,self._q),
+                              		seasonal_order=(self._P,self._D,self._Q,12),
                             		enforce_invertibility=False,
                               		enforce_stationarity=False)
 
 
-		self.results = self.mod.fit()
+		self.results = self.mod.fit(disp=False)
 
-		self.test['Predicted'] = self.results.predict(start = self.test_begin,
-                                                	      end = self.test_end, 
-                                                  	      dynamic= True)
+		self.test['Predicted'] = self.results.predict(start = self._test_begin,
+                                                	end = self._test_end, 
+                                                  	dynamic= True)
 
 		
 		self.test_error =  np.sqrt(sum(
@@ -263,18 +300,18 @@ class Seasonal_Arima(object):
                                self.test['Recorded'])**2)\
                                /len(self.test['Predicted']))
 
-		self.params = [self.p, self.d, self.q, self.P, self.D, self.Q]
+		self.params = [self._p, self._d, self._q, self._P, self._D, self._Q]
 
 		#####################################################################	
 		# Now train the model on the WHOLE data set
 		#####################################################################
 		
-		self.training['Recorded'][self.test_begin:self.test_end] = self.test['Recorded']
+		self.training['Recorded'][self._test_begin:self._test_end] = self.test['Recorded']
 
 
 	def forecast(self):
 		""" 
-		Forecast the crime rates into 2016 and 2017.
+		Forecasts the crime rates into 2016 and 2017.
 		"""
 
 		forecast = pd.DataFrame(index=self.forecast_date_list, 
@@ -283,24 +320,23 @@ class Seasonal_Arima(object):
 		self.training = pd.concat([self.training, forecast])
 
 		self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                              		order=(self.p,self.d,self.q),
-                              		seasonal_order=(self.P,self.D,self.Q,12),
+                              		order=(self._p,self._d,self._q),
+                              		seasonal_order=(self._P,self._D,self._Q,12),
                             		enforce_invertibility=True,
                               		enforce_stationarity=False)
 
 
-		self.results = self.mod.fit()
+		self.results = self.mod.fit(disp=False)
 
-		self.forecast_results = self.results.predict(start = self.forecast_begin,
-                                        		    end = self.forecast_end, 
+		self.forecast_results = self.results.predict(start = self._forecast_begin,
+                                        		    end = self._forecast_end, 
                                       			    dynamic= True)
 
-		
+			
 	def plot_test(self):
 		"""
 		Plots the predicted and recorded crime values on the test set.
-		"""
-		
+		"""	
 		self.test[['Recorded','Predicted']].ix[-12:].plot(linewidth=3)
 		plt.ylabel('Monthlt incidents')
 		plt.xlabel('Year')  
@@ -311,7 +347,9 @@ class Seasonal_Arima(object):
 		Plots the predicted and recorded crime values on the test set.
 		"""
 		#plt.clf()
-		self.forecast_results.ix[-24:].plot(linewidth=3)
+		#plt.plot(self.forecast_results - self.test_error, 'r')
+		#plt.plot(self.forecast_results + self.test_error, 'r')
+		self.forecast_results.ix[-24:].plot(linewidth=2.5)
 		plt.ylabel('Monthlt incidents')
 		plt.xlabel('Year')  
         

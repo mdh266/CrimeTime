@@ -1,3 +1,8 @@
+"""
+Views module contains the Flask methods to be called on the front end and
+makes request to the various backend modules.
+"""
+
 from flask import render_template
 from flask import Response
 from flask import request
@@ -31,28 +36,48 @@ from statsmodels.tsa.seasonal import seasonal_decompose
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/../backend/")
 from CrimeMapper import CrimeMapper
-from Forcasting import Seasonal_Arima
+from Forecasting import Seasonal_ARIMA
 
 
 @app.route('/')
 @app.route('/input')
 def crime_time_input():
 	"""
-	Forwards the input page for the website.
+	Forwards the input.html page for the website.
+
+	:returns: input.html
+	:rtype: html
 	"""
 	return render_template("input.html")
 
 @app.route('/contact')
 def contact():
 	"""
-	Forwards the contact page for the website.
+	Forwards the contact.html page for the website.
+	
+	:returns: contact.html
+	:rtype: html
 	"""
 	return render_template("contact.html")
+
+@app.route('/blogpost')
+def blogpost():
+	"""
+	Forwards the BlogPost.html page for the website..
+
+	:returns: BlogPost.html
+	:rtype: html
+	"""
+	return render_template("BlogPost.html")
+
 
 @app.route('/about')
 def about():
 	"""
-	Forwards the about page for the website.
+	Forwards the about.html page for the website.
+
+	:returns: about.html
+	:rtype: html
 	"""
 	return render_template("about.html")
 
@@ -61,8 +86,15 @@ def about():
 def crime_time_output():
 	"""
 	This function drives the output for the website. It takes in the address supplied by
-	the user and drives all the plotting and then fowards to the output page for the 
-	website.
+	the user and calls either of the methods,		
+
+	* frontend.all_crimes(...)
+	* frontend.historical(...)
+	* frontend.future(...)
+
+	Each of the above methods will then forward their results to a resulting html page.	
+	
+	:rtype: html
 	"""
 	## Crime type: Larceny, Robbery, Burglary, Assault
 	crime_type = str(request.args.get('crime_type'))
@@ -95,9 +127,21 @@ def crime_time_output():
 
 def all_crimes(CT, borough):
 	"""
-	Make the map of the precinct and historical crime rates 
+	Makes the map of the precinct and historical crime rates 
 	for that all the different 
 	crimes and send the images off to the html file.
+
+	:Parameters:
+		**CT** (:class:`backend.CrimeMapper`): 
+			CrimeMapper object for which to store the address and crime data.
+
+		**borough** (str): 
+			Input string that contains the address, just number and street. 
+
+	:returns: AllCrimes.html
+	
+	:rtype: html
+
 	"""
 	# get the address, crime stats and precinct info
 	crime_info = {}
@@ -179,9 +223,23 @@ def all_crimes(CT, borough):
 
 def future(CT, crime_type, borough):
 	"""
-	Make the map of the precinct and forecasted crime rate 
+	Makes the map of the precinct and forecasted crime rate 
 	plot based of the seasonal arima model for that specific
 	crime and send the images off to the html file.
+
+	:Parameters:
+		**CT** (:class:`backend.CrimeMapper`): 
+			CrimeMapper object for which to store the address and crime data.
+
+		**crime_type** (str): 
+			The specific user selected type of crime, i.e. 'Assualt'.
+
+		**borough** (str): 
+			Input string that contains the address, just number and street. 
+
+	:returns: future.html
+	
+	:rtype: html
 	"""
 	# get the crime and precinct info
 	crime_info = {}
@@ -234,10 +292,12 @@ def future(CT, crime_type, borough):
 	# Make the forecasted crime rates
 	#######################################################
 
-	SAR = Seasonal_Arima(CT)
+	SAR = Seasonal_ARIMA(CT)
 	SAR.fit()
 	SAR.forecast()
-	SAR.forecast_results.ix[-24:].plot(linewidth=3)
+	#plt.plot(SAR.forecast_results.ix[-24:] - SAR.test_error, 'r-')
+	#plt.plot(SAR.forecast_results.ix[-24:] + SAR.test_error, 'r-')
+	SAR.forecast_results.ix[-24:].plot(linewidth=2.5)
 	plt.ylabel('Monthly Incidents', fontsize=13)
 	title = 'Future monthly ' + crime_type +\
 		' rates in Precinct ' + str(precinct)
@@ -259,8 +319,22 @@ def future(CT, crime_type, borough):
 	
 def historical(CT, prec, crime_type):
 	"""
-	Make the historical plots based of the data and pass them
+	Makes the historical plots based of the data and pass them
 	off to the html file.
+	
+	:Parameters:
+		**CT** (:class:`backend.CrimeMapper`): 
+		CrimeMapper object for which to store the address and crime data.
+
+		**prec** (int):
+			The police precinct of user supplied address.
+
+		**crime_type** (str): 
+			The specific user selected type of crime, i.e. 'Assualt'.
+
+	:returns: historical.html
+	
+	:rtype: html
 	"""
 	# Now make the map of the police precincts and color in the one
 	# that includes the address the user suppslied.

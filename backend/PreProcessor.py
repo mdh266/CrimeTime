@@ -12,10 +12,23 @@ import os.path
 import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
-class PreProcessor(object):
+class PreProcessor:
 	"""
-	Creates a SQLite database for crimes in New York City.  It will
-	read in the data from the CSV file, clean it and store it to disk.
+	The PreProcessor class reates a SQLite database for crimes in New York City.  
+	It will read in the data from the CSV file, clean it and store it to disk.
+	It will also scrape the NYPD's Police Precinct website
+	using `beautifulsoup <https://pypi.python.org/pypi/beautifulsoup4>`_ and get each 
+	police precinct's name, address and telephone numeber, it will also stored this to disk
+	in the same database.
+
+	:attributes:
+		**address** (str):
+			The address and name of the csv crime database.
+		
+		**database_name** (str):
+			The directory address and name of the to be created database.
+
+	:methods:
 	"""
     
 	def __init__(self, database_name):
@@ -23,15 +36,17 @@ class PreProcessor(object):
 		Constructor will just create address and column names.
 		"""
 		## Column names for the database
-		self.address = None
+		self.address = "./data/NYPD_7_Major_Felony_Incident_Map.csv"
 		self.database_name = database_name
 
 	def make_NYC_Crime_database(self, table_name):
 		"""
-		This function is does all the work to make the crime data base.
+		This function is does all the work to make the crime data base and cleans the data.
+
+		:Parameters: table_name (str) :
+			The table name of the database to be created.
 		"""
 		## The csv file of crime data downloaded from NYC Open Data
-		self.address = "./data/NYPD_7_Major_Felony_Incident_Map.csv"
     
 		crime_df = pd.read_csv(self.address,index_col=None)
 
@@ -85,6 +100,13 @@ class PreProcessor(object):
 		"""
 		For extracting the precinct number from the name of the precinct.
 		Ex: input = 14th precinct, output = 14
+
+		:parameters: string (str):
+			The name of the precinct.
+
+		:returns: The precinct number.
+
+		:rtype: int
 		"""
 		return int(re.findall('(\d+).*',string)[0])
 
@@ -92,13 +114,20 @@ class PreProcessor(object):
 		"""
 		Removes some bad characters from the beautiful soup unicode and then 
 		returns the string.
+
+		:parameters:
+			string (str)
+
+		:returns: The same string with any '\xa0` characters removed.
+		:rtype: str
 		"""
 		return str(re.sub('\xa0','',string))
 
 	def make_NYC_precinct_database(self):
 		"""
 		This function scrapes the NYC Police website and gathers info on 
-		the police precincts and stores them in the sqlite database.
+		the police precincts using `beautifulsoup <https://pypi.python.org/pypi/beautifulsoup4>`_
+		and stores them in the SQLite database.
 		"""
 		names = []
 		numbers = []
@@ -140,6 +169,7 @@ class PreProcessor(object):
                              'Address':address,
                              'Telephone':numbers
                             })
+
 		# push it to the sqlite database
 		conn = sqlite3.connect(self.database_name)
 		NYC_Police_Precinct_Info.to_sql("NYC_Precint_Info", conn, 
