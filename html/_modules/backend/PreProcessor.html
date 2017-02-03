@@ -1,0 +1,272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>backend.PreProcessor &#8212; CrimeTime  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CrimeTime  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CrimeTime  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for backend.PreProcessor</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env/python</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">from</span> <span class="nn">bs4</span> <span class="k">import</span> <span class="n">BeautifulSoup</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;/..&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PreProcessor"><a class="viewcode-back" href="../../backend.html#backend.PreProcessor.PreProcessor">[docs]</a><span class="k">class</span> <span class="nc">PreProcessor</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	The PreProcessor class reates a SQLite database for crimes in New York City.  </span>
+<span class="sd">	It will read in the data from the CSV file, clean it and store it to disk.</span>
+<span class="sd">	It will also scrape the NYPD&#39;s Police Precinct website</span>
+<span class="sd">	using `beautifulsoup &lt;https://pypi.python.org/pypi/beautifulsoup4&gt;`_ and get each </span>
+<span class="sd">	police precinct&#39;s name, address and telephone numeber, it will also stored this to disk</span>
+<span class="sd">	in the same database.</span>
+
+<span class="sd">	:attributes:</span>
+<span class="sd">		**address** (str):</span>
+<span class="sd">			The address and name of the csv crime database.</span>
+<span class="sd">		</span>
+<span class="sd">		**database_name** (str):</span>
+<span class="sd">			The directory address and name of the to be created database.</span>
+
+<span class="sd">	:methods:</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+    
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database_name</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Constructor will just create address and column names.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c1">## Column names for the database</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="s2">&quot;./data/NYPD_7_Major_Felony_Incident_Map.csv&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
+
+<div class="viewcode-block" id="PreProcessor.make_NYC_Crime_database"><a class="viewcode-back" href="../../backend.html#backend.PreProcessor.PreProcessor.make_NYC_Crime_database">[docs]</a>	<span class="k">def</span> <span class="nf">make_NYC_Crime_database</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This function is does all the work to make the crime data base and cleans the data.</span>
+
+<span class="sd">		:Parameters: table_name (str) :</span>
+<span class="sd">			The table name of the database to be created.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c1">## The csv file of crime data downloaded from NYC Open Data</span>
+    
+		<span class="n">crime_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span><span class="n">index_col</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;OBJECTID&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Identifier&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;CompStat Month&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;CompStat Day&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;CompStat Year&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Jurisdiction&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;Sector&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+		<span class="c1"># rename the columns</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DATE&#39;</span><span class="p">,</span><span class="s1">&#39;WEEKDAY&#39;</span><span class="p">,</span><span class="s1">&#39;MONTH&#39;</span><span class="p">,</span> <span class="s1">&#39;DAY&#39;</span><span class="p">,</span> <span class="s1">&#39;YEAR&#39;</span><span class="p">,</span><span class="s1">&#39;HOUR&#39;</span><span class="p">,</span>
+                    		<span class="s1">&#39;OFFENSE&#39;</span><span class="p">,</span> <span class="s1">&#39;CLASSIFICATION&#39;</span><span class="p">,</span> <span class="s1">&#39;PRECINCT&#39;</span><span class="p">,</span> 
+                  		  <span class="s1">&#39;BOROUGH&#39;</span><span class="p">,</span> <span class="s1">&#39;LATITUDE&#39;</span><span class="p">,</span> <span class="s1">&#39;LONGITUDE&#39;</span><span class="p">,</span> <span class="s1">&#39;EXTRA&#39;</span><span class="p">]</span>
+
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+		<span class="c1"># Convert precinct from float value to int value</span>
+		<span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;PRECINCT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;PRECINCT&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;YEAR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;YEAR&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        
+		<span class="c1"># Rewrite the points to get their latitudes and longitudes</span>
+		<span class="n">crime_points</span> <span class="o">=</span> <span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;EXTRA&#39;</span><span class="p">]</span>
+		<span class="n">NUM_CRIMES</span> <span class="o">=</span> <span class="n">crime_points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+		<span class="n">CRIME_LONGITUDE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">NUM_CRIMES</span><span class="p">)</span>
+		<span class="n">CRIME_LATITUDE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">NUM_CRIMES</span><span class="p">)</span>
+
+		<span class="n">index</span><span class="o">=</span><span class="mi">0</span>
+		<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">crime_points</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+			<span class="n">coor</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">r&quot;[-+]?\d*\.\d+|\d+&quot;</span><span class="p">,</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+			<span class="n">CRIME_LONGITUDE</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">coor</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+			<span class="n">CRIME_LATITUDE</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">coor</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+			<span class="n">index</span> <span class="o">=</span> <span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
+       
+		<span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;LONGITUDE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CRIME_LONGITUDE</span>
+		<span class="n">crime_df</span><span class="p">[</span><span class="s1">&#39;LATITUDE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CRIME_LATITUDE</span>
+    
+		<span class="c1">#DROP EXTRA COLUMNS</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;CLASSIFICATION&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;EXTRA&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+		<span class="n">crime_df</span> <span class="o">=</span> <span class="n">crime_df</span><span class="p">[</span><span class="n">crime_df</span><span class="o">.</span><span class="n">YEAR</span> <span class="o">&gt;=</span> <span class="mi">2006</span><span class="p">]</span>
+        
+		<span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_name</span><span class="p">)</span>
+		<span class="n">crime_df</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span><span class="n">flavor</span><span class="o">=</span><span class="s1">&#39;sqlite&#39;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+		<span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PreProcessor.extract_precinct"><a class="viewcode-back" href="../../backend.html#backend.PreProcessor.PreProcessor.extract_precinct">[docs]</a>	<span class="k">def</span> <span class="nf">extract_precinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		For extracting the precinct number from the name of the precinct.</span>
+<span class="sd">		Ex: input = 14th precinct, output = 14</span>
+
+<span class="sd">		:parameters: string (str):</span>
+<span class="sd">			The name of the precinct.</span>
+
+<span class="sd">		:returns: The precinct number.</span>
+
+<span class="sd">		:rtype: int</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;(\d+).*&#39;</span><span class="p">,</span><span class="n">string</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PreProcessor.extract_string"><a class="viewcode-back" href="../../backend.html#backend.PreProcessor.PreProcessor.extract_string">[docs]</a>	<span class="k">def</span> <span class="nf">extract_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Removes some bad characters from the beautiful soup unicode and then </span>
+<span class="sd">		returns the string.</span>
+
+<span class="sd">		:parameters:</span>
+<span class="sd">			string (str)</span>
+
+<span class="sd">		:returns: The same string with any &#39;\xa0` characters removed.</span>
+<span class="sd">		:rtype: str</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\xa0</span><span class="s1">&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">string</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PreProcessor.make_NYC_precinct_database"><a class="viewcode-back" href="../../backend.html#backend.PreProcessor.PreProcessor.make_NYC_precinct_database">[docs]</a>	<span class="k">def</span> <span class="nf">make_NYC_precinct_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This function scrapes the NYC Police website and gathers info on </span>
+<span class="sd">		the police precincts using `beautifulsoup &lt;https://pypi.python.org/pypi/beautifulsoup4&gt;`_</span>
+<span class="sd">		and stores them in the SQLite database.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">numbers</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">address</span> <span class="o">=</span> <span class="p">[]</span>
+		<span class="n">precincts</span> <span class="o">=</span> <span class="p">[]</span>
+		
+		<span class="c1"># begin to scrape the website below</span>
+		<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://www.nyc.gov/html/nypd/html/home/precincts.shtml&quot;</span>
+		<span class="n">soup</span> <span class="o">=</span> <span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span><span class="s2">&quot;lxml&quot;</span><span class="p">)</span>
+
+
+		<span class="c1"># manhattan, bronx, brooklyn, queens, staten island</span>
+		<span class="n">precincts_in_table</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">8</span><span class="p">]</span>
+		<span class="c1"># get the manhattan precinct info</span>
+		<span class="n">tables</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="n">class_</span><span class="o">=</span><span class="s1">&#39;bodytext&#39;</span><span class="p">)</span>
+
+		<span class="c1"># loop through the tables and extract the precinct info</span>
+		<span class="k">for</span> <span class="n">prec</span> <span class="ow">in</span> <span class="n">precincts_in_table</span><span class="p">:</span>
+			<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tables</span><span class="p">[</span><span class="n">prec</span><span class="p">]</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;tr&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:]:</span>
+				<span class="n">col</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
+				<span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extract_string</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get_text</span><span class="p">())</span>
+				<span class="c1"># deal with the special cases that dont use their number</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Midtown So. Pct.&#39;</span><span class="p">:</span>
+					<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;14th Precinct&#39;</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Central Park Pct.&#39;</span><span class="p">:</span>
+					<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;22nd Precinct&#39;</span>
+				<span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Midtown No. Pct.&#39;</span><span class="p">:</span>
+					<span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;18th Precinct&#39;</span>
+	
+				<span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+				<span class="n">precincts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_precinct</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+				<span class="n">numbers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_string</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()))</span>
+				<span class="n">address</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extract_string</span><span class="p">(</span><span class="n">col</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">get_text</span><span class="p">()))</span>
+
+		<span class="c1"># now make pandas dataframe form the data</span>
+		<span class="n">NYC_Police_Precinct_Info</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s1">&#39;Precinct&#39;</span><span class="p">:</span><span class="n">precincts</span><span class="p">,</span>
+                             <span class="s1">&#39;Name&#39;</span><span class="p">:</span><span class="n">names</span><span class="p">,</span>
+                             <span class="s1">&#39;Address&#39;</span><span class="p">:</span><span class="n">address</span><span class="p">,</span>
+                             <span class="s1">&#39;Telephone&#39;</span><span class="p">:</span><span class="n">numbers</span>
+                            <span class="p">})</span>
+
+		<span class="c1"># push it to the sqlite database</span>
+		<span class="n">conn</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_name</span><span class="p">)</span>
+		<span class="n">NYC_Police_Precinct_Info</span><span class="o">.</span><span class="n">to_sql</span><span class="p">(</span><span class="s2">&quot;NYC_Precint_Info&quot;</span><span class="p">,</span> <span class="n">conn</span><span class="p">,</span> 
+						<span class="n">flavor</span><span class="o">=</span><span class="s1">&#39;sqlite&#39;</span><span class="p">,</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+		<span class="n">conn</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+		
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+	<span class="n">PreProcess</span> <span class="o">=</span> <span class="n">PreProcessor</span><span class="p">(</span><span class="s2">&quot;./data/CrimeTime.db&quot;</span><span class="p">)</span>
+	<span class="n">PreProcess</span><span class="o">.</span><span class="n">make_NYC_Crime_database</span><span class="p">(</span><span class="s2">&quot;NYC_Crime&quot;</span><span class="p">)</span>
+	<span class="n">PreProcess</span><span class="o">.</span><span class="n">make_NYC_precinct_database</span><span class="p">()</span>
+	
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CrimeTime  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Michael Harmon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    </div>
+  </body>
+</html>
