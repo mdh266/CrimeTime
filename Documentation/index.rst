@@ -6,21 +6,46 @@
 Welcome to CrimeTime's documentation page!
 ==========================================
 
+*To see the web application in action visit:* `www.crimetime.online <www.crimetime.online>`_
+
 Introduction
 ------------
-*To see the web application in action visit:* `www.crimetime.online <www.crimetime.online>`_ 
 
-This web application was part of a 3 week project at `Insight Data Science <http://insightdatascience.com/>`_. 
-It built was written in `Python <https://www.python.org/>`_ and 
+This web application was part of a 3 week project at `Insight Data Science <http://insightdatascience.com/>`_.  
+Users are prompted to enter 
+an address from the input page seen below.
+	
+
+.. image:: input.png 
+    :width: 300pt
+
+And they get back a report on the historical trends of crimes in their neighborhood
+
+	
+.. centered::
+.. image:: Historical.png 
+    :width: 300pt
+
+Users can look at the historical data of specific crimes in their neighborhood and get 
+more specific on trends, seasonality, as well as which days and time most crimes happen like the results below:
+
+	
+.. centered::
+.. image:: Dashboard.png 
+    :width: 300pt
+
+
+Users can also choose to forecast specific crime rates in their neighborhood into the future.
+
+Documentation
+-------------
+This code was written in `Python <https://www.python.org/>`_ and 
 `Flask <http://flask.pocoo.org/>`_
-and was deployed to `Amazon web services <https://aws.amazon.com/>`_. Users are prompted to enter an address and then I use the 
+and was deployed to `Amazon web services <https://aws.amazon.com/>`_. Once the address is supplied by the user I use the
 `GeoPy <https://pypi.python.org/pypi/geopy>`_ library to get the latitude and longitude of the address. 
 Once that latitude and longitude are known I 
 use the `shapely <https://pypi.python.org/pypi/Shapely>`_ library to find out which police 
-precinct the address is in and obtain the data on that police precinct.
-
-
-The info for police precincts was obtained by scraping the `NYPD's 
+precinct the address is in and obtain the data on that police precinct. The info for police precincts was obtained by scraping the `NYPD's 
 website <http://www.nyc.gov/html/nypd/html/home/precincts.shtml>`_ using 
 `beautifulsoup <https://pypi.python.org/pypi/beautifulsoup4>`_ library and 
 also this specific 
@@ -34,9 +59,7 @@ and cleaning was completed using `Pandas <http://pandas.pydata.org/>`_ and
 model through the python library `StatsModels <http://statsmodels.sourceforge.net/>`_. 
 I used a grid search to obtain the appropriate model paramaters that minimize the validation error.
 
-Documentation
--------------
-Documentation contents
+For specific information on the classes and methods, see the below,
 
 .. toctree::
    :maxdepth: 4
