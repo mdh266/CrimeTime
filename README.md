@@ -9,7 +9,6 @@ the latitude and longitude of the address.  Once that latitude and longitude are
 use the <a href="https://pypi.python.org/pypi/Shapely">shapely</a> library to find out which police 
 precinct the address is in and obtain the data on that police precinct.
 
-
 The info for police precincts was obtained by scraping the NYPD's 
 <a href="http://www.nyc.gov/html/nypd/html/home/precincts.shtml"> website </a> using 
 <a href="https://pypi.python.org/pypi/beautifulsoup4"> beautifulsoup</a> library and 
@@ -24,7 +23,7 @@ model through the python library <a href="http://statsmodels.sourceforge.net/"> 
 I used a grid search to obtain the appropriate model paramaters that minimize the validation error.
 
 
-**Dependenices**
+**Dependencies**
 
 1. Python 2.7
 2. SQLite
@@ -36,10 +35,10 @@ I used a grid search to obtain the appropriate model paramaters that minimize th
 8. Flask (0.11.1)
 9. Basemap (1.0.7)
 10. Matplotlib (1.5.3)
-12. Numpy (1.11.2)
-13. Beautifulsoup4 (4.5.3)
-14. Doxygen (only to build documentation)
-15. pytest (only for testing)
+11. Numpy (1.11.2)
+12. Beautifulsoup4 (4.5.3)
+13. Sphinx (only to build documentation)
+14. pytest (only for testing)
 
 **Installation**
 

@@ -26,19 +26,68 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 import warnings
 warnings.filterwarnings('ignore')
 
-class CrimeMapper(object):
+class CrimeMapper:
 	"""
-	This is the main class for CrimeTime. It will deal with all the back end
-	data management and interacting with the database.
+	This is the main class for CrimeTime. It will deal with all the backend
+	data management and interacting with the SQLite database.
+
+	It will be used by :class:`backend.Forecasting.Seasonal_ARIMA` class.
+
+
+	:attributes:
+	------------
+
+		**production_mode** (boolean):
+			Boolean to describe if code is running in production mode. Will be
+			used for describing where database is.
+
+		**geo_df** (`GeoPandas DataFrame <http://geopandas.org/data_structures.html#geodataframe>`_):
+			The GeoPandas DataFrame of the geojson file, to plot the NYPD Precincts.
+
+		**prec_found** (boolean):
+			Boolean to record if the police precinct of the user entered address has been found.
+		
+		**location** (dict):
+			Dictionary returned by `geopy <https://pypi.python.org/pypi/geopy/1.11.0>`_
+			of the address, lattitude and longitude.
+
+		**address** (str): 
+			Address returned by `geopy <https://pypi.python.org/pypi/geopy/1.11.0>`_ .
+
+		**prec** (int):
+			Police precinct of the address.
+		
+		**crime_name** (str):
+			The name of the crime, i.e., 'Larceny', 'Assault', etc.
+
+		**crime_df** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame for the selected 'crime_name' history of the selected police precinct.
+
+		**ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame that will act as our monthly time series data for our 
+			precinct and selected crime.
+
+		**sql_query** (str): 
+			The SQL query that will depend on the crime type and police precinct.
+
+	:methods:
 	"""    
-	geolocator = Nominatim()
     
 	def __init__(self, production_mode):
 		"""
-		Constructor just makes a geopandas dataframe based off the police precincts.
+		Constructor just makes a GeoPandas <http://geopandas.org/data_structures.html#geodataframe>`_)
+		based off the police precincts in the /data/ directory.
+
+		:Parameters: production_mode (boolean):
+			Boolean to describe if code is running in production mode. Will be
+			used for describing where database is.
+
 		"""
 		## Boolean to know to run in production mode, changes location of database
 		self.production_mode = production_mode
+
+		## Geolocator object
+		self._geolocator = Nominatim()
 	
 		## Police precinct geopandas dataframe
 		self.geo_df = None
@@ -70,10 +119,10 @@ class CrimeMapper(object):
 		self.ts			   = None
 
 		## Dataframe that has all days in the week and the crimes occurring each day
-		self.DAYS_OF_CRIME = None
+		self._DAYS_OF_CRIME = None
 
 		## Dataframe that has all the hours in the day and the crimes occurring each hour
-		self.CRIME_HOURS   = None
+		self._CRIME_HOURS   = None
 
 		## sql_query to 
 		self.sql_query	   = None
@@ -81,14 +130,22 @@ class CrimeMapper(object):
 	def find_precinct(self, address):
 		""" 
 		Takes in address and finds the police precint the address belongs to.
-		Returns a Boolean of whether the precinct of address is found.
+
+		:Parameters: address (str): 
+			The address contianing number, street and borough.
+
+		:returns: 
+			Boolean of whether the police precinct of address is found.
+
+		:rtype: 
+			Boolean.
 		"""
 
 		## Boolean of whether the precinct of address is found	
 		self.prec_found = False
 		## location of the address
 		try:
-			self.location = self.geolocator.geocode(address)
+			self.location = self._geolocator.geocode(address)
 		except:
 			pass
 		
@@ -117,9 +174,12 @@ class CrimeMapper(object):
 
 	def get_all_crime_data(self):
 		"""
-		Get all the crime data for this police precinct from excluding rape 
-		and murder.
+		Get all the crime data for this police precinct (excluding rape 
+		and murder) by querying the SQLite database.
+
+		**NOTE:** find_precinct() must have been called first.
 		"""
+
 		self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
 				+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
 				+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTE\''
@@ -161,7 +221,19 @@ class CrimeMapper(object):
 
 	def get_crime_data(self, crime_name):
 		"""
-		Gets the crime data for this police precinct from the SQL Database
+		Gets the crime data for the user supplied crime in the users 
+		police precinct from the SQLite database.
+
+		**NOTE:** find_precinct() must have been called first.
+
+		:Parameters: crime_name (str): 
+			The user selected crime. Accepts:
+
+			* 'Larceny'
+			* 'Robbery'
+			* 'Assault' 
+			* 'Burglary'
+			* 'Car Theft'
 		"""
 		self.crime_name = crime_name
 		dont_continue = False
@@ -196,14 +268,23 @@ class CrimeMapper(object):
         
 	def restamp(self, row):
 		"""
-		Rewrite the date into an appropriate 
-		formate for pandas time series.
+		Rewrite the date into an appropriate formate for pandas time series.
+		
+		:Parameters: row (str):
+			The string that contains the stamp, e.g.: '01/31/2006 12:00:00 AM'
+	
+		:returns: (str)
+			The datetime.date version of the date, e.g. '01-31-2006'
+		
+		:rtype: str
+
 		"""
 		return datetime.strptime(row, '%m/%d/%Y %I:%M:%S %p').date()
     
 	def make_time_series(self):
 		""" 
-		Turn the dataframe into a pandas series with daily events.
+		Rewrites the self.crime_df into self.ts where the crimes have been resampled
+		for each month.
 		"""
 		aux = self.crime_df['DATE'].apply(self.restamp)
 		temp = pd.Series(Counter(aux))
@@ -219,7 +300,7 @@ class CrimeMapper(object):
 
 	def percent_per_day(self):
 		"""
-		Makes a pandas time series for the number of crimes that occurred in 
+		Makes a Pandas DataFrame for the number of crimes that occurred in 
 		the selected precinct on each day of the week.
 		"""
 		CRIME_DAYS = 100 * (self.crime_df.groupby('WEEKDAY').size() 
@@ -231,36 +312,46 @@ class CrimeMapper(object):
 						'Thursday','Friday','Saturday','Sunday']
     
 		## Time series of the number of crimes that occurred in the day of week
-		self.DAYS_OF_CRIME = pd.Series()
+		self._DAYS_OF_CRIME = pd.Series()
 		for day in days:
-			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
+			self._DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
     
         
 	def percent_per_hour(self):
 		""" 
-		Makes a pandas time series for the number of crimes that occurred in 
+		Makes a Pandas DataFrame for the number of crimes that occurred in 
 		the selected precinct on hour of the day.
 		"""
 		self.crime_df['HOUR'] = self.crime_df['HOUR'].astype(int)
-		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
-		self.CRIME_HOURS = 100 * (self.CRIME_HOURS
-                          /self.CRIME_HOURS.sum())
+		self._CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
+		self._CRIME_HOURS = 100 * (self._CRIME_HOURS
+                          /self._CRIME_HOURS.sum())
 
 	def get_precinct(self):
 		"""
-		Returns the precinct of the address searched for.
+		Returns the precinct of the address that was searched for.
+		
+		:returns: prec
+		:rtype: int
 		"""
 		return str(self.prec)
 
 	def get_address(self):
 		"""
 		Returns the address that was searched for.
+		
+		:returns: address
+		:rtype: str
 		"""
 		return str(self.address)
 
 	def get_precinct_info(self):
 		"""
-		Returns the police precinct info for the selected precinct
+		This function will query the SQLite databse to obtain
+		the police precinct info for users precinct.
+
+		:returns: precinct's name, address and telephone number.
+		:rtype: dict
 		"""
 		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
 				+ str(self.prec)
@@ -283,8 +374,9 @@ class CrimeMapper(object):
 
 	def plot_decompose(self):
 		"""
-		Plots the raw monthly number of crimes, as well as the trend and seasonality
-		of crime in the precinct.
+		This plots the raw monthly number of crimes, as well as the trend and seasonality
+		of crime in the precinct.  Under the hood it is calling StatsModels'
+		`seasonal_decompose(...) <http://www.statsmodels.org/dev/generated/statsmodels.tsa.seasonal.seasonal_decompose.html>`_
 		"""
 		fig = plt.figure(figsize=(9, 5))
 		plt.clf()

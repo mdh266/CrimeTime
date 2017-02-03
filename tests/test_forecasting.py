@@ -12,14 +12,14 @@ def test_initialization():
 	CT.get_crime_data("Larceny")
 	CT.make_time_series()
 	model = Seasonal_ARIMA(CT)
-	assert model.training_begin == 0
-	assert model.training_end == 108
-	assert model.validation_begin == 96
-	assert model.validation_end == 108
-	assert model.test_begin	== 108
-	assert model.test_end == 120
-	assert model.forecast_begin == 120
-	assert model.forecast_end == 144
+	assert model._training_begin == 0
+	assert model._training_end == 108
+	assert model._validation_begin == 96
+	assert model._validation_end == 108
+	assert model._test_begin	== 108
+	assert model._test_end == 120
+	assert model._forecast_begin == 120
+	assert model._forecast_end == 144
 	
 
 # test the training process
@@ -30,12 +30,12 @@ def test_fitting():
 	CT.make_time_series()
 	model = Seasonal_ARIMA(CT)
 	model.fit()
-	assert model.p == 1
-	assert model.q == 1
-	assert model.d == 1
-	assert model.P == 0
-	assert model.D == 1
-	assert model.Q == 1
+	assert model._p == 1
+	assert model._q == 1
+	assert model._d == 1
+	assert model._P == 0
+	assert model._D == 1
+	assert model._Q == 1
 
 
 # test the forecasting
