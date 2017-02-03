@@ -101,7 +101,6 @@ To test the code to make sure it works run the following command from the /Crime
 
 ## Documentation
 
-
-
+Sphinx documentation is located in the /hmtl directory and can be viewd locally.  Online documentation is progress.
 
 
