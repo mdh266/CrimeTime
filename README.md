@@ -11,6 +11,7 @@ Users are prompted to enter an address from the input page seen below.
 
 ![Input Page](./Documentation/input.png)
 
+
 And they get back a report on the historical trends of crimes in their neighborhood
 
 	
