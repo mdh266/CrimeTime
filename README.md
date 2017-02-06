@@ -9,19 +9,19 @@ This web application was part of a 3 week project at <a href="http://insightdata
 Users are prompted to enter an address from the input page seen below.
 	
 
-![Input Page](./Documentation/input.png)
+![Input Page](./doc/input.png)
 
 
 And they get back a report on the historical trends of crimes in their neighborhood
 
 	
-![All Crime Info](./Documentation/Historical.png)
+![All Crime Info](./doc/Historical.png)
 
 Users can look at the historical data of specific crimes in their neighborhood and get 
 more specific on trends, seasonality, as well as which days and time most crimes happen like the results below:
 
 	
-![Specific Crime Info](./Documentation/Dashboard.png)
+![Specific Crime Info](./doc/Dashboard.png)
 
 Users can also choose to forecast specific crime rates in their neighborhood into the future.
 
@@ -68,8 +68,14 @@ I used a grid search to obtain the appropriate model paramaters that minimize th
 ## Running it on your own computer
 
 To run this web application on your computer make sure you have obtained or built the SQLite
-database and have all the dependencies installed on you computer.  Then run the 
-command in the /CrimeTime/ directory:
+database and have all the dependencies installed on you computer.  You can install all the 
+dependencies (except for python and Sphinx) by typing the following command from the 
+<code>CrimeTime/</code> directory:
+
+<code> pip install -r requirements.txt</code>
+
+
+Then run the command in the <code>CrimeTime/</code> directory:
 
 	python run.py	
 
@@ -83,8 +89,8 @@ Enter the address http://0.0.0.0:5000/ into your web browser to use the web appl
 ## Building the database
 
 Download the file "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data website, 
-place it in the /CrimeTime/data/ directory. Then to build the database type
-the command in the /CrimeTime/ directory,
+place it in the <code>CrimeTime/data/</code> directory. Then to build the database type
+the command in the <code>CrimeTime/</code> directory,
 
 	python ./backend/PreProcessor.py	
 
@@ -100,6 +106,15 @@ To test the code to make sure it works run the following command from the /Crime
 
 
 ## Documentation
+To build the documentation type in terminal from <code>/CrimeTime/</code> directory:
+
+<code> sphinx-apidoc -F -o doc/ backend/ </code>
+
+Then cd into the <code>doc/</code> directory and type,
+
+<code> make html </code>
+
+The html documentation will be in the directory <code>_build/html/</code>.
 
 
 

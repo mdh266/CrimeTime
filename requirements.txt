@@ -1,0 +1,18 @@
+# Requirements for CrimeTime.
+# To use type: pip install -r requirements.txt
+
+## Requirements without Version specifiers
+pandas
+geopandas
+geopy
+shapely
+flask
+matplotlib
+numpy
+beautifulsoup
+pytest
+
+
+## Requirements with version numbers
+statsmodels == 0.8.0rc1
+basemap == 1.0.7
