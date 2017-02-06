@@ -116,7 +116,6 @@ Then cd into the <code>doc/</code> directory and type,
 
 The html documentation will be in the directory <code>_build/html/</code>.
 
-
-
+Sphinx documentation is located in the /hmtl directory and can be viewd locally.  Online documentation is progress.
 
 
