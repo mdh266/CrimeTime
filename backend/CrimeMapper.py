@@ -70,6 +70,26 @@ class CrimeMapper:
 		**sql_query** (str): 
 			The SQL query that will depend on the crime type and police precinct.
 
+		**DAYS_OF_CRIME** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			Pandas Series which contain the day of week and the percentage of crimes that occured on each day.
+
+		**TIME_OF_DAY** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			Pandas Series which contain the hours of the day and the percentage of crimes that occured at each hour.
+
+		**assault_ ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame that will have the monlthy trends in the assault.
+
+		**burglary ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame that will have the monlthy trends in the burglary.
+
+		**larceny ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame that will have the monlthy trends in the larceny.
+
+		**car_ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame that will have the monlthy trends in the car theft.
+
+		**robbery_ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
+			The Pandas DataFrame that will have the monlthy trends in the robbery.
 	:methods:
 	"""    
     
@@ -119,13 +139,25 @@ class CrimeMapper:
 		self.ts			   = None
 
 		## Dataframe that has all days in the week and the crimes occurring each day
-		self._DAYS_OF_CRIME = None
+		self.DAYS_OF_CRIME = None
 
 		## Dataframe that has all the hours in the day and the crimes occurring each hour
-		self._CRIME_HOURS   = None
+		self.CRIME_HOURS   = None
 
 		## sql_query to 
 		self.sql_query	   = None
+
+		#
+		self.assault_ts    = None
+
+		self.larceny_ts    = None
+
+		self.robbery_ts    = None
+
+		self.burglary_ts   = None
+
+		self.car_ts        = None
+
 
 	def find_precinct(self, address):
 		""" 
@@ -312,9 +344,9 @@ class CrimeMapper:
 						'Thursday','Friday','Saturday','Sunday']
     
 		## Time series of the number of crimes that occurred in the day of week
-		self._DAYS_OF_CRIME = pd.Series()
+		self.DAYS_OF_CRIME = pd.Series()
 		for day in days:
-			self._DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
+			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
     
         
 	def percent_per_hour(self):
@@ -323,9 +355,9 @@ class CrimeMapper:
 		the selected precinct on hour of the day.
 		"""
 		self.crime_df['HOUR'] = self.crime_df['HOUR'].astype(int)
-		self._CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
-		self._CRIME_HOURS = 100 * (self._CRIME_HOURS
-                          /self._CRIME_HOURS.sum())
+		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
+		self.CRIME_HOURS = 100 * (self.CRIME_HOURS
+                          /self.CRIME_HOURS.sum())
 
 	def get_precinct(self):
 		"""
