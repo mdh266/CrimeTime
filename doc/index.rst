@@ -87,9 +87,12 @@ Dependencies
 
 Installation
 --------------
-To build all the dependencies using pip (except for Python and Sphinx), from the CrimeTime/ type in terminal,
+You can install all the dependencies using `pip <https://pip.pypa.io/en/stable/>`_ (except for python, Sphinx, Basemap and Statsmodels) by typing the following command from the 
+*CrimeTime/* directory:
 
 *pip install -r requirements.txt*
+
+To install Basemap (1.0.7) and StatsModels (0.8.0rc1) use the `Anaconda <https://www.continuum.io/anaconda-overview>`_ distribution.
 
 
 Now, Download the file "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data website, 
