@@ -11,8 +11,3 @@ matplotlib
 numpy
 beautifulsoup
 pytest
-
-
-## Requirements with version numbers
-statsmodels == 0.8.0rc1
-basemap == 1.0.7

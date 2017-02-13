@@ -67,10 +67,12 @@ I used a grid search to obtain the appropriate model paramaters with the selecti
 
 To run this web application on your computer make sure you have obtained or built the SQLite
 database and have all the dependencies installed on you computer.  You can install all the 
-dependencies (except for python and Sphinx) by typing the following command from the 
+dependencies using <a href="https://pip.pypa.io/en/stable/">pip</a> (except for python, Sphinx, Basemap and Statsmodels) by typing the following command from the 
 <code>CrimeTime/</code> directory:
 
 <code> pip install -r requirements.txt</code>
+
+To install Basemap (1.0.7) and StatsModels (0.8.0rc1) use the <a href="https://www.continuum.io/anaconda-overview">Anaconda</a> distribution.
 
 
 Then run the command in the <code>CrimeTime/</code> directory:
