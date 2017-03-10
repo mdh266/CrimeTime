@@ -109,11 +109,10 @@ You will then see a report on the testing results.
 ## Documentation
 To build the documentation for this code type the following command in terminal from <code>/CrimeTime/</code> directory:
 
-<code> phinx-apidoc -F -o doc/ backend/</code>
-
+	sphinx-apidoc -F -o doc/ backend/
 Then cd into the <code>doc/</code> directory and type,
 
-<code>hake html</code>
+	make html
 
 The html documentation will be in the directory <code>_build/html/</code>.  Open the file <code>index.html</code> in that directory.
 
