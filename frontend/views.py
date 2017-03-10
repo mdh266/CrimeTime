@@ -350,12 +350,13 @@ def historical(CT, prec, crime_type):
 	title = 'Seasonality Of Crimes Involving ' + crime_type +\
 		' in Precinct ' + str(precinct)
 	decomp_crime = seasonal_decompose(CT.ts,freq=12)
-	season_crime = decomp_crime.seasonal
+	season_crime = decomp_crime.seasonal[0:12]
 	plt.plot(season_crime, label='Seasonality', linewidth=3)
 	plt.title(title,fontsize=13)
 	plt.xlabel('Year', fontsize=13)
-	#plt.xlim([2011,2013])
-	#plt.legend(fontsize=13)
+	labels = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct',\
+			  'Nov','Dec']
+	plt.xticks(season_crime.index,labels)
 	
 	# Have to save the image this way so that the program can be run on AWS
 	io = StringIO()

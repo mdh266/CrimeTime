@@ -59,14 +59,19 @@
 
     <div class="starter-template">
         <h2> Predicting crime rates in New York City </h2>
-			</br></br>
-			<p>
-			<b> Select "All Crimes" from "Crime Type" to see all historical trends of all crimes in your neighborhood and obtain your police precinct info. (The choice "timeline" does not matter)
-			</br>
-			</br>
-			Select a specific crime in "Crime Type" to get historical statistics (select "Historical" in timeline) or future crime rates (select "Forcasted" in timeline) for specific the type of crime in your neighborhood.</br> </br>
-			<b>
-			</p>
+		</br></br>
+		<p>
+		<b> Select "All Crimes" from "Crime Type" to see all historical 
+		trends of all crimes in your neighborhood and obtain your police 
+		precinct info. (The choice "timeline" does not matter)
+		</br>
+		</br>
+		Select a specific crime in "Crime Type" to get historical statistics 
+		(select "Historical" in timeline) or future crime rates 
+		(select "Forecasted" in timeline) for specific the type of crime 
+		in your neighborhood.</br> </br>
+		<b>
+		</p>
     </div>
 
  	  <form  action="/output" method="GET">
@@ -108,7 +113,7 @@
 		<label for="timeline"> Timeline:</label>
   	&nbsp; </br>
 		<input type="radio" name="timeline" value="Historical" checked> Historical Crime Statistics</br>
-		<input type="radio" name="timeline" value="Future"> Forcasted Crime Statistics (can take a few moments to build)
+		<input type="radio" name="timeline" value="Future"> Forecasted Crime Statistics (can take a few moments to build)
     &nbsp;    &nbsp;    &nbsp;
 		</div>
 <!--

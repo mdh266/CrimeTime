@@ -331,25 +331,3 @@ class Seasonal_ARIMA:
 		self.forecast_results = self.results.predict(start = self._forecast_begin,
                                         		    end = self._forecast_end, 
                                       			    dynamic= True)
-
-			
-	def plot_test(self):
-		"""
-		Plots the predicted and recorded crime values on the test set.
-		"""	
-		self.test[['Recorded','Predicted']].ix[-12:].plot(linewidth=3)
-		plt.ylabel('Monthlt incidents')
-		plt.xlabel('Year')  
-	
-
-	def plot_forecast(self):
-		"""
-		Plots the predicted and recorded crime values on the test set.
-		"""
-		#plt.clf()
-		#plt.plot(self.forecast_results - self.test_error, 'r')
-		#plt.plot(self.forecast_results + self.test_error, 'r')
-		self.forecast_results.ix[-24:].plot(linewidth=2.5)
-		plt.ylabel('Monthlt incidents')
-		plt.xlabel('Year')  
-        
