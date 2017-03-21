@@ -214,7 +214,7 @@ class CrimeMapper:
 
 		self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
 				+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
-				+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTE\''
+				+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTER\''
 
 		if self.production_mode == True:
 			conn = sqlite3.connect('./data/CrimeTime.db')
@@ -385,7 +385,7 @@ class CrimeMapper:
 		:returns: precinct's name, address and telephone number.
 		:rtype: dict
 		"""
-		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct = '\
+		sql_query = 'SELECT * FROM NYC_CRIME WHERE Precinct = '\
 				+ str(self.prec)
 
 		if self.production_mode == True:		

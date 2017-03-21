@@ -100,7 +100,7 @@ def test_percent_day():
 	result_ts = pickle.load(open("tests/Crimes_of_day.p", "rb"))
 		
 	# test same size
-	assert result_ts.shape[0] == CM._DAYS_OF_CRIME.shape[0]
+	assert result_ts.shape[0] == CM.DAYS_OF_CRIME.shape[0]
 
 	# now see if the dates are the same
 	same_numbers = True
@@ -120,7 +120,7 @@ def test_percent_hour():
 	result_ts = pickle.load(open("tests/Crimes_of_hour.p", "rb"))
 		
 	# test same size
-	assert result_ts.shape[0] == CM._CRIME_HOURS.shape[0]
+	assert result_ts.shape[0] == CM.CRIME_HOURS.shape[0]
 
 	# now see if the dates are the same
 	same_numbers = True
