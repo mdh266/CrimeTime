@@ -385,7 +385,7 @@ class CrimeMapper:
 		:returns: precinct's name, address and telephone number.
 		:rtype: dict
 		"""
-		sql_query = 'SELECT * FROM NYC_CRIME WHERE Precinct = '\
+		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct= '\
 				+ str(self.prec)
 
 		if self.production_mode == True:		

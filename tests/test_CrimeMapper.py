@@ -105,7 +105,7 @@ def test_percent_day():
 	# now see if the dates are the same
 	same_numbers = True
 	for i in range(result_ts.shape[0]):
-		if result_ts[i] != CM._DAYS_OF_CRIME[i]:
+		if result_ts[i] != CM.DAYS_OF_CRIME[i]:
 			same_numbers = False
 
 	assert same_numbers
@@ -125,7 +125,7 @@ def test_percent_hour():
 	# now see if the dates are the same
 	same_numbers = True
 	for i in range(result_ts.shape[0]):
-		if result_ts[i] != CM._CRIME_HOURS[i]:
+		if result_ts[i] != CM.CRIME_HOURS[i]:
 			same_numbers = False
 
 	assert same_numbers
