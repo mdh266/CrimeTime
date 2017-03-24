@@ -1,0 +1,298 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CrimeTime frontend package &#8212; CrimeTime  documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="CrimeTime  documentation" href="index.html" />
+    <link rel="prev" title="CrimeTime backend package" href="backend.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="backend.html" title="CrimeTime backend package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">CrimeTime  documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="crimetime-frontend-package">
+<h1>CrimeTime frontend package<a class="headerlink" href="#crimetime-frontend-package" title="Permalink to this headline">¶</a></h1>
+<p>This documentation of the frontend package of CrimeTime which uses Flask, HTML and CSS.</p>
+<div class="section" id="module-frontend.views">
+<span id="views-module"></span><h2>views module<a class="headerlink" href="#module-frontend.views" title="Permalink to this headline">¶</a></h2>
+<p>Views module contains the Flask methods to be called on the front end and
+makes request to the various backend modules.</p>
+<dl class="function">
+<dt id="frontend.views.about">
+<code class="descclassname">frontend.views.</code><code class="descname">about</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#about"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.about" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forwards the about.html page for the website.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">about.html</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">html</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.all_crimes">
+<code class="descclassname">frontend.views.</code><code class="descname">all_crimes</code><span class="sig-paren">(</span><em>CT</em>, <em>borough</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#all_crimes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.all_crimes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the map of the precinct and historical crime rates 
+for that all the different 
+crimes and send the images off to the html file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>CT</strong> (<a class="reference internal" href="html/CrimeTime/doc/backend.html#module-backend.CrimeMapper" title="backend.CrimeMapper"><code class="xref py py-class docutils literal"><span class="pre">backend.CrimeMapper</span></code></a>): </dt>
+<dd><p class="first last">CrimeMapper object for which to store the address and crime data.</p>
+</dd>
+<dt><strong>borough</strong> (str): </dt>
+<dd><p class="first last">Input string that contains the address, just number and street.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">AllCrimes.html</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">html</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.blogpost">
+<code class="descclassname">frontend.views.</code><code class="descname">blogpost</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#blogpost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.blogpost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forwards the BlogPost.html page for the website..</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">BlogPost.html</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">html</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.contact">
+<code class="descclassname">frontend.views.</code><code class="descname">contact</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#contact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forwards the contact.html page for the website.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">contact.html</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">html</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.crime_time_input">
+<code class="descclassname">frontend.views.</code><code class="descname">crime_time_input</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#crime_time_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.crime_time_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forwards the input.html page for the website.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">input.html</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">html</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.crime_time_output">
+<code class="descclassname">frontend.views.</code><code class="descname">crime_time_output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#crime_time_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.crime_time_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function drives the output for the website. It takes in the address supplied by
+the user and calls either of the methods,</p>
+<ul class="simple">
+<li>frontend.all_crimes(...)</li>
+<li>frontend.historical(...)</li>
+<li>frontend.future(...)</li>
+</ul>
+<p>Each of the above methods will then forward their results to a resulting html page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">html</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.future">
+<code class="descclassname">frontend.views.</code><code class="descname">future</code><span class="sig-paren">(</span><em>CT</em>, <em>crime_type</em>, <em>borough</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#future"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.future" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the map of the precinct and forecasted crime rate 
+plot based of the seasonal arima model for that specific
+crime and send the images off to the html file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><dl class="first docutils">
+<dt><strong>CT</strong> (<a class="reference internal" href="html/CrimeTime/doc/backend.html#module-backend.CrimeMapper" title="backend.CrimeMapper"><code class="xref py py-class docutils literal"><span class="pre">backend.CrimeMapper</span></code></a>): </dt>
+<dd><p class="first last">CrimeMapper object for which to store the address and crime data.</p>
+</dd>
+<dt><strong>crime_type</strong> (str): </dt>
+<dd><p class="first last">The specific user selected type of crime, i.e. &#8216;Assualt&#8217;.</p>
+</dd>
+<dt><strong>borough</strong> (str): </dt>
+<dd><p class="first last">Input string that contains the address, just number and street.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">future.html</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">html</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="frontend.views.historical">
+<code class="descclassname">frontend.views.</code><code class="descname">historical</code><span class="sig-paren">(</span><em>CT</em>, <em>prec</em>, <em>crime_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/frontend/views.html#historical"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#frontend.views.historical" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the historical plots based of the data and pass them
+off to the html file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>CT</strong> (<a class="reference internal" href="html/CrimeTime/doc/backend.html#module-backend.CrimeMapper" title="backend.CrimeMapper"><code class="xref py py-class docutils literal"><span class="pre">backend.CrimeMapper</span></code></a>): 
+CrimeMapper object for which to store the address and crime data.</p>
+<dl class="docutils">
+<dt><strong>prec</strong> (int):</dt>
+<dd><p class="first last">The police precinct of user supplied address.</p>
+</dd>
+<dt><strong>crime_type</strong> (str): </dt>
+<dd><p class="first last">The specific user selected type of crime, i.e. &#8216;Assualt&#8217;.</p>
+</dd>
+</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">historical.html</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">html</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">CrimeTime frontend package</a><ul>
+<li><a class="reference internal" href="#module-frontend.views">views module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="backend.html"
+                        title="previous chapter">CrimeTime backend package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/frontend.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="backend.html" title="CrimeTime backend package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">CrimeTime  documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Michael Harmon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    </div>
+  </body>
+</html>

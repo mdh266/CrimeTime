@@ -1,0 +1,443 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>backend.Forecasting &#8212; CrimeTime  documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="CrimeTime  documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CrimeTime  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for backend.Forecasting</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env/python</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">dateutil.relativedelta</span> <span class="k">import</span> <span class="n">relativedelta</span>
+
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+<span class="kn">from</span> <span class="nn">statsmodels.tsa.stattools</span> <span class="k">import</span> <span class="n">adfuller</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#zzimport seaborn as sns</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Seasonal_ARIMA"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA">[docs]</a><span class="k">class</span> <span class="nc">Seasonal_ARIMA</span><span class="p">:</span>
+	<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  	This class builds a seasonal based ARIMA model using </span>
+<span class="sd">	`StatsModels &lt;http://statsmodels.sourceforge.net/0.6.0/generated/statsmodels.tsa.arima_model.ARIMA.html&gt;`_.</span>
+<span class="sd">	</span>
+<span class="sd">	**CT** is the ( :class:`backend.CrimeMapper.CrimeMapper` ) object that </span>
+<span class="sd">	has the crime data for this precinct.  </span>
+
+<span class="sd">	**Note:** make_time_series() needs to have been called before.</span>
+<span class="sd">		</span>
+<span class="sd">	:attributes:</span>
+<span class="sd">		</span>
+<span class="sd">		**training_date_list** (list) :</span>
+<span class="sd">			Training date set, contains months from 1/2006 - 12/2014.</span>
+
+<span class="sd">		**validation_date_list** (list) :</span>
+<span class="sd">			Validation date set, contains months from 1/2014 - 12/2014.</span>
+
+<span class="sd">		**test_date_list** (list) :</span>
+<span class="sd">			Test date set, contains months from 1/2015 - 12/2015.</span>
+
+<span class="sd">		**forecast_date_list** (list) :</span>
+<span class="sd">			Forecasting date set, contains months from 1/2016 - 12/2017.</span>
+
+
+<span class="sd">		**params** (list)</span>
+<span class="sd">			The p,d,q,P,D,Q values in the Seasonal ARIMA model.</span>
+
+<span class="sd">		**test_error** (float)</span>
+<span class="sd">			The root mean square error in our model.</span>
+<span class="sd">		</span>
+<span class="sd">		**training** (`Pandas DataFrame &lt;http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html&gt;`_)</span>
+<span class="sd">			The training set recorded and predicted monthly crime rates.</span>
+
+<span class="sd">		**validation** (`Pandas DataFrame &lt;http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html&gt;`_)</span>
+<span class="sd">			The validation set recorded and predicted monthly crime rates.</span>
+
+<span class="sd">		**test** (`Pandas DataFrame &lt;http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html&gt;`_)</span>
+<span class="sd">			The test set recorded and predicted monthly crime rates.</span>
+
+<span class="sd">	:methods:</span>
+<span class="sd">	--------</span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CT</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		The constructor builds the training, validation and test set from the </span>
+<span class="sd">		CrimeMapper object and also initializes the data members to be zero.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		
+		<span class="n">training_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s2">&quot;2006-1-31&quot;</span><span class="p">,</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+
+		<span class="c1">## Dates for the training set time series</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">training_date_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">training_start</span> 
+				<span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">108</span><span class="p">)]</span>
+
+		<span class="n">validation_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s2">&quot;2014-1-31&quot;</span><span class="p">,</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+		<span class="c1">## Dates for the validation set time series</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">validation_date_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">validation_start</span> 
+				<span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">)]</span>
+
+		<span class="n">test_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s2">&quot;2015-1-31&quot;</span><span class="p">,</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+
+		<span class="c1">## Dates for the test set time series</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">test_date_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">test_start</span> 
+				<span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">12</span><span class="p">)]</span>
+	
+		<span class="n">forecast_start</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s2">&quot;2016-1-31&quot;</span><span class="p">,</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span>
+
+		<span class="c1">## Dates for the forecasting time series</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">forecast_date_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">forecast_start</span> 
+				<span class="o">+</span> <span class="n">relativedelta</span><span class="p">(</span><span class="n">months</span><span class="o">=</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">24</span><span class="p">)]</span>
+
+		<span class="c1">## Dataframe for first difference and seasonal first difference</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">CT</span><span class="o">.</span><span class="n">ts</span><span class="p">,</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Crimes&#39;</span><span class="p">])</span>
+
+		<span class="c1">## Errors in the model in the grid search</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_errors</span> <span class="o">=</span> <span class="p">[]</span>
+		
+		<span class="c1">## Grid search (p,q,d) and (P, Q, D) values for the model </span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span> <span class="o">=</span> <span class="p">[]</span>
+		
+		<span class="c1">## The p values in ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_p</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="c1">## The q values in ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_q</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="c1">## The d values in ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="c1">## The P values in ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="c1">## The D values in ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_D</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="c1">## The Q values in ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="c1">## List of the [p,d,q,P,D,Q] values for seasonal ARIMA</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="kc">None</span>
+		
+		<span class="c1">## The RMS error on the test</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">test_error</span> <span class="o">=</span> <span class="kc">None</span>
+
+		<span class="c1">## Starting index for the training set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_training_begin</span> <span class="o">=</span> <span class="mi">0</span>
+	
+		<span class="c1">## Ending index for the training set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_training_end</span>   <span class="o">=</span> <span class="mi">108</span>
+
+		<span class="c1">## Starting index for the validation set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_validation_begin</span> <span class="o">=</span> <span class="mi">96</span>
+
+		<span class="c1">## Starting index for the validation set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_validation_end</span>   <span class="o">=</span> <span class="mi">108</span>
+
+		<span class="c1">## Starting index for the test set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_test_begin</span>	    <span class="o">=</span> <span class="mi">108</span>
+
+		<span class="c1">## Starting index for the test set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_test_end</span>	    <span class="o">=</span> <span class="mi">120</span>
+
+		<span class="c1">## Starting index for the forecasting set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_forecast_begin</span> <span class="o">=</span> <span class="mi">120</span>
+
+		<span class="c1">## Starting index for the forecasting set</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_forecast_end</span>   <span class="o">=</span> <span class="mi">144</span>
+			
+		<span class="c1">## The training set time series data</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">training</span>  <span class="o">=</span>  <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training_date_list</span><span class="p">,</span>
+						<span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">,</span>	
+							 <span class="s1">&#39;Predicted&#39;</span><span class="p">])</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CT</span><span class="o">.</span><span class="n">ts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_training_begin</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_training_end</span><span class="p">]</span>
+
+
+		<span class="c1">## The validation set time series data</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">validation</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">validation_date_list</span><span class="p">,</span>
+						<span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">,</span>
+							 <span class="s1">&#39;Predicted&#39;</span><span class="p">])</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CT</span><span class="o">.</span><span class="n">ts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_validation_begin</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_validation_end</span><span class="p">]</span>
+
+		<span class="c1">## The test set time series data</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">test</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_date_list</span><span class="p">,</span>
+						<span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">,</span>
+					 	 	 <span class="s1">&#39;Predicted&#39;</span><span class="p">])</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CT</span><span class="o">.</span><span class="n">ts</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_begin</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_end</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Seasonal_ARIMA.stationarity"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.stationarity">[docs]</a>	<span class="k">def</span> <span class="nf">stationarity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Performs Dickey-Fuller test for stationarity and plots the results.</span>
+
+<span class="sd">		:parameters: (`Pandas &lt;http://pandas.pydata.org/pandas-docs/stable/generated/pandas.Series.html&gt;`_)</span>
+<span class="sd">			The Pandas Series of the monthly crime data.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c1"># used from </span>
+		<span class="c1">#http://www.seanabu.com/2016/03/22/time-series-seasonal-ARIMA-model-in-python/</span>
+		<span class="c1">#Determing rolling statistics</span>
+		<span class="n">rolmean</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+		<span class="n">rolstd</span> <span class="o">=</span> <span class="n">timeseries</span><span class="o">.</span><span class="n">rolling</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span><span class="n">center</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+		
+		<span class="c1">#Plot rolling statistics:</span>
+		<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+		<span class="n">orig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Original&#39;</span><span class="p">)</span>
+		<span class="n">mean</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rolmean</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Rolling Mean&#39;</span><span class="p">)</span>
+		<span class="n">std</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">rolstd</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Rolling Std&#39;</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;best&#39;</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Rolling Mean &amp; Standard Deviation&#39;</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    
+		<span class="nb">print</span> <span class="s1">&#39;Results of Dickey-Fuller Test:&#39;</span>
+		<span class="n">dftest</span> <span class="o">=</span> <span class="n">adfuller</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">autolag</span><span class="o">=</span><span class="s1">&#39;AIC&#39;</span><span class="p">)</span>
+		<span class="n">dfoutput</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dftest</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Test Statistic&#39;</span><span class="p">,</span><span class="s1">&#39;p-value&#39;</span><span class="p">,</span>
+					<span class="s1">&#39;#Lags Used&#39;</span><span class="p">,</span><span class="s1">&#39;Number of Observations Used&#39;</span><span class="p">])</span>
+		<span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">dftest</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+			<span class="n">dfoutput</span><span class="p">[</span><span class="s1">&#39;Critical Value (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="o">%</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+		<span class="nb">print</span> <span class="n">dfoutput</span> </div>
+
+<div class="viewcode-block" id="Seasonal_ARIMA.first_diff"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.first_diff">[docs]</a>	<span class="k">def</span> <span class="nf">first_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Obtains the first difference and performs Dickey-Fuller test for stationarity.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">First Difference:</span><span class="se">\n</span><span class="s2">&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;first_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">Crimes</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">Crimes</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stationarity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">first_diff</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Seasonal_ARIMA.seasonal_first_diff"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.seasonal_first_diff">[docs]</a>	<span class="k">def</span> <span class="nf">seasonal_first_diff</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Obtains the first seasonal difference and performs Dickey-Fuller test for stationarity.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="nb">print</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Seasonal First Difference:</span><span class="se">\n</span><span class="s2">&quot;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;first_seasonal_diff&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">first_diff</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">first_diff</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">stationarity</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">first_seasonal_diff</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Seasonal_ARIMA.fit"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.fit">[docs]</a>	<span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Run throught the different values ARIMA parameter values and fit the model</span>
+<span class="sd">		to the training set.  Collect the error of how it performs on the validation</span>
+<span class="sd">		set and then find the (p,d,q,P,D,Q) values that give the lowest</span>
+<span class="sd">		error on the validation set. </span>
+
+<span class="sd">		Then forecast it into 2015 which is the test set, which it has NOT</span>
+<span class="sd">		seen. Then get the error on this set.  </span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="c1">#####################################################################	</span>
+		<span class="c1"># Train the model and get the errors on the validation set</span>
+		<span class="c1">#####################################################################</span>
+		
+		<span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+			<span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">):</span>
+				<span class="k">for</span> <span class="n">P</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+					<span class="k">for</span> <span class="n">Q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
+						<span class="k">try</span><span class="p">:</span>
+							<span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">SARIMAX</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">],</span> 
+                               							<span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">q</span><span class="p">),</span>
+                                      					<span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="n">P</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">Q</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span>
+                                      					<span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                      					<span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+	
+							<span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+				
+		
+							<span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;Predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span>	
+															<span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_validation_begin</span><span class="p">,</span>
+                        			                        <span class="n">end</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_validation_end</span><span class="p">,</span>
+                                                			<span class="n">dynamic</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+							<span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span>
+                             					 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;Predicted&#39;</span><span class="p">]</span><span class="o">-</span>\
+                               					<span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>\
+                               					<span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validation</span><span class="p">[</span><span class="s1">&#39;Predicted&#39;</span><span class="p">])))</span>
+
+
+							<span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">P</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">Q</span><span class="p">]</span>
+	
+							<span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+						<span class="k">except</span><span class="p">:</span>
+							<span class="k">pass</span>
+
+		<span class="c1">#####################################################################	</span>
+		<span class="c1"># Now find the best model and find error on test set</span>
+		<span class="c1">#####################################################################</span>
+
+		<span class="n">future</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_date_list</span><span class="p">,</span>
+				      <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="n">future</span><span class="p">])</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_errors</span><span class="p">)</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">_p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_P</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_D</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">][</span><span class="mi">4</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">_Q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_PDQ_vals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">][</span><span class="mi">5</span><span class="p">]</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">SARIMAX</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">],</span> 
+                              		<span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="p">),</span>
+                              		<span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_D</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span>
+                            		<span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              		<span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;Predicted&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_begin</span><span class="p">,</span>
+                                                	<span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_test_end</span><span class="p">,</span> 
+                                                  	<span class="n">dynamic</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">test_error</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span>
+                              <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;Predicted&#39;</span><span class="p">]</span><span class="o">-</span>\
+                               <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>\
+                               <span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;Predicted&#39;</span><span class="p">]))</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_D</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">]</span>
+
+		<span class="c1">#####################################################################	</span>
+		<span class="c1"># Now train the model on the WHOLE data set</span>
+		<span class="c1">#####################################################################</span>
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_begin</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_test_end</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Seasonal_ARIMA.forecast"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.forecast">[docs]</a>	<span class="k">def</span> <span class="nf">forecast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">		Forecasts the crime rates into 2016 and 2017.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="n">forecast</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">forecast_date_list</span><span class="p">,</span> 
+					 <span class="n">columns</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">training</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">,</span> <span class="n">forecast</span><span class="p">])</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">mod</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">tsa</span><span class="o">.</span><span class="n">SARIMAX</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training</span><span class="p">[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">],</span> 
+                              		<span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_p</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_d</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_q</span><span class="p">),</span>
+                              		<span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_P</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_D</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_Q</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span>
+                            		<span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                              		<span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mod</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">forecast_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forecast_begin</span><span class="p">,</span>
+                                        		    <span class="n">end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forecast_end</span><span class="p">,</span> 
+                                      			    <span class="n">dynamic</span><span class="o">=</span> <span class="kc">True</span><span class="p">)</span></div>
+		
+<div class="viewcode-block" id="Seasonal_ARIMA.plot_test"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.plot_test">[docs]</a>	<span class="k">def</span> <span class="nf">plot_test</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Plots the predicted and recorded crime values on the test set.</span>
+<span class="sd">		&quot;&quot;&quot;</span>	
+		<span class="bp">self</span><span class="o">.</span><span class="n">test</span><span class="p">[[</span><span class="s1">&#39;Recorded&#39;</span><span class="p">,</span><span class="s1">&#39;Predicted&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="o">-</span><span class="mi">12</span><span class="p">:]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Monthlt incidents&#39;</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Year&#39;</span><span class="p">)</span>  </div>
+	
+
+<div class="viewcode-block" id="Seasonal_ARIMA.plot_forecast"><a class="viewcode-back" href="../../html/CrimeTime/doc/backend.html#backend.Forecasting.Seasonal_ARIMA.plot_forecast">[docs]</a>	<span class="k">def</span> <span class="nf">plot_forecast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Plots the predicted and recorded crime values on the test set.</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="c1">#plt.clf()</span>
+		<span class="c1">#plt.plot(self.forecast_results - self.test_error, &#39;r&#39;)</span>
+		<span class="c1">#plt.plot(self.forecast_results + self.test_error, &#39;r&#39;)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">forecast_results</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="o">-</span><span class="mi">24</span><span class="p">:]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">linewidth</span><span class="o">=</span><span class="mf">2.5</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Monthlt incidents&#39;</span><span class="p">)</span>
+		<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Year&#39;</span><span class="p">)</span>  </div></div>
+        
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">CrimeTime  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Michael Harmon.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+    </div>
+  </body>
+</html>
