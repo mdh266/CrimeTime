@@ -11,3 +11,4 @@ matplotlib
 numpy
 beautifulsoup
 pytest
+sphinx
