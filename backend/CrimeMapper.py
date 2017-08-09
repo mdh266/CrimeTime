@@ -211,9 +211,12 @@ class CrimeMapper:
 		**NOTE:** find_precinct() must have been called first.
 		"""
 
-		self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
-				+ str(self.prec) + ' AND OFFENSE != \'RAPE\''\
-				+ 'AND OFFENSE != \'MURDER & NON-NEGL. MANSLAUGHTER\''
+		self.sql_query = """SELECT * 
+							FROM NYC_CRIME 
+							WHERE PRECINCT = %s AND 
+								  OFFENSE != 'RAPE'AND 
+								  OFFENSE != 'MURDER & NON-NEGL. MANSLAUGHTER'
+						""" % str(self.prec)
 
 		if self.production_mode == True:
 			conn = sqlite3.connect('./data/CrimeTime.db')
@@ -284,9 +287,12 @@ class CrimeMapper:
 			print "Cant Work With That Crime Type"
 
 		if(dont_continue == False):
-			self.sql_query = 'SELECT * FROM NYC_CRIME WHERE PRECINCT = '\
-					+ str(self.prec) + ' AND OFFENSE = \'' \
-					+ str(self.crime_name) + '\' ' 
+			self.sql_query = """
+							SELECT * FROM 
+							NYC_CRIME 
+							WHERE PRECINCT = %s AND 
+								  OFFENSE = '%s'
+							""" % (str(self.prec), str(self.crime_name))
 
 			if self.production_mode == True:
 				conn = sqlite3.connect('./data/CrimeTime.db')
@@ -335,12 +341,12 @@ class CrimeMapper:
 		the selected precinct on each day of the week.
 		"""
 		CRIME_DAYS = 100 * (self.crime_df.groupby('WEEKDAY').size() 
-                    /self.crime_df.groupby('WEEKDAY').size().sum())
+						/ self.crime_df.groupby('WEEKDAY').size().sum())
 
 		#print type(CRIME_DAYS)
     
 		days = ['Monday','Tuesday','Wednesday',
-						'Thursday','Friday','Saturday','Sunday']
+				'Thursday','Friday','Saturday','Sunday']
     
 		## Time series of the number of crimes that occurred in the day of week
 		self.DAYS_OF_CRIME = pd.Series()
@@ -355,8 +361,7 @@ class CrimeMapper:
 		"""
 		self.crime_df['HOUR'] = self.crime_df['HOUR'].astype(int)
 		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
-		self.CRIME_HOURS = 100 * (self.CRIME_HOURS
-                          /self.CRIME_HOURS.sum())
+		self.CRIME_HOURS = 100 * (self.CRIME_HOURS /self.CRIME_HOURS.sum())
 
 	def get_precinct(self):
 		"""
@@ -384,8 +389,10 @@ class CrimeMapper:
 		:returns: precinct's name, address and telephone number.
 		:rtype: dict
 		"""
-		sql_query = 'SELECT * FROM NYC_Precint_Info WHERE Precinct= '\
-				+ str(self.prec)
+		sql_query = """SELECT * 
+					   FROM NYC_Precint_Info 
+					   WHERE Precinct=%s
+					""" % str(self.prec)
 
 		if self.production_mode == True:		
 			conn = sqlite3.connect('./data/CrimeTime.db')
@@ -416,8 +423,8 @@ class CrimeMapper:
 		season_crime = decomp_crime.seasonal
 		trend_crime   = decomp_crime.trend
 		
-		title = 'Decomposition Of Crimes Involving ' + self.crime_name +\
-						' in Precinct ' + str(self.prec)
+		title = """Decomposition Of Crimes Involving %s in Precinct %s 
+				""" %  (str(self.crime_name),str(self.prec))
 
 		plt.plot(self.ts, label='Monthly data', linewidth=3)
 		plt.plot(season_crime, label='Seasonality', linewidth=3)

@@ -48,18 +48,16 @@ class PreProcessor:
     
 		crime_df = pd.read_csv(self.address,index_col=None)
 
-		crime_df.drop('OBJECTID',1, inplace=True)
-		crime_df.drop('Identifier',1, inplace=True)
-		crime_df.drop('CompStat Month',1, inplace=True)
-		crime_df.drop('CompStat Day',1, inplace=True)
-		crime_df.drop('CompStat Year',1, inplace=True)
-		crime_df.drop('Jurisdiction',1, inplace=True)
-		crime_df.drop('Sector',1, inplace=True)
+		cols_to_drop = ['OBJECTID', 'Identifier', 
+					    'CompStat Month', 'CompStat Day', 
+					    'CompStat Year', 'Jurisdiction', 'Sector']
+
+		crime_df.drop(cols_to_drop,1, inplace=True)
         
 		# rename the columns
 		crime_df.columns = ['DATE','WEEKDAY','MONTH', 'DAY', 'YEAR','HOUR',
                     		'OFFENSE', 'CLASSIFICATION', 'PRECINCT', 
-                  		  'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
+                  		    'BOROUGH', 'LATITUDE', 'LONGITUDE', 'EXTRA']
 
 		crime_df.dropna(inplace=True)
 
