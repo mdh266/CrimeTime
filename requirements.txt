@@ -12,3 +12,4 @@ numpy
 beautifulsoup
 pytest
 sphinx
+tornado
