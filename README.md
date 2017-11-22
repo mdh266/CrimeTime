@@ -1,8 +1,5 @@
 # CrimeTime: Predicting crime rates in NYC
 
-
-*To see the web application in action visit:* <a href="http://crimetime.online"> www.crimetime.online</a>
-
 ## Introduction 
 
 This web application was part of a 3 week project at <a href="http://insightdatascience.com/">Insight Data Science</a>.  I originally started this project because I was interested in developing a data driven approach to reducing crime in the NYC area.  Working on this project I quickly noticed that different neighborhoods are affected by different types of crime and these crimes peak at different times of the year (you can see this <a href="http://michael-harmon.com/blog/crimetime.html">blog post</a> to read more).  I thought if I could make a web application that forecasts monthly crime rates on a local level it might help police redistribute their resources more effectively and thus reduce the crime in NYC.  The applicaiton could also be of interest to individuals or business who are concerned about crime rates in their neighborhood.  
