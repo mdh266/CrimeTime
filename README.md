@@ -1,4 +1,4 @@
-# CrimeTime: Predicting crime rates in NYC
+# CrimeTime
 
 ## Introduction 
 
