@@ -125,7 +125,7 @@ class Seasonal_ARIMA:
 		self._training_begin = 0
 	
 		## Ending index for the training set
-		self._training_end   = 108
+		self._training_end   = 96
 
 		## Starting index for the validation set
 		self._validation_begin = 96
@@ -147,23 +147,20 @@ class Seasonal_ARIMA:
 			
 		## The training set time series data
 		self.training  =  pd.DataFrame(index=self.training_date_list,
-						columns=['Recorded',	
-							 'Predicted'])
+										columns=['Recorded', 'Predicted'])
 		
 		self.training['Recorded'] = CT.ts[self._training_begin:self._training_end]
 
 
 		## The validation set time series data
 		self.validation = pd.DataFrame(index=self.validation_date_list,
-						columns=['Recorded',
-							 'Predicted'])
+									   columns=['Recorded','Predicted'])
 
 		self.validation['Recorded'] = CT.ts[self._validation_begin:self._validation_end]
 
 		## The test set time series data
 		self.test = pd.DataFrame(index=self.test_date_list,
-						columns=['Recorded',
-					 	 	 'Predicted'])
+								columns=['Recorded','Predicted'])
 
 		self.test['Recorded'] = CT.ts[self._test_begin:self._test_end]
 
@@ -190,19 +187,19 @@ class Seasonal_ARIMA:
 		plt.title('Rolling Mean & Standard Deviation')
 		plt.show()
     
-		print 'Results of Dickey-Fuller Test:'
+		print('Results of Dickey-Fuller Test:')
 		dftest = adfuller(timeseries, autolag='AIC')
 		dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value',
 					'#Lags Used','Number of Observations Used'])
 		for key,value in dftest[4].items():
 			dfoutput['Critical Value (%s)'%key] = value
-		print dfoutput 
+		print(dfoutput)
 
 	def first_diff(self):
 		"""
 		Obtains the first difference and performs Dickey-Fuller test for stationarity.
 		"""
-		print "\nFirst Difference:\n"
+		print("\nFirst Difference:\n")
 		self.df['first_diff'] = self.df.Crimes - self.df.Crimes.shift(1)
 		self.stationarity(self.df.first_diff.dropna(inplace=False))
 
@@ -210,7 +207,7 @@ class Seasonal_ARIMA:
 		"""
 		Obtains the first seasonal difference and performs Dickey-Fuller test for stationarity.
 		"""
-		print "\nSeasonal First Difference:\n"
+		print("\nSeasonal First Difference:\n")
 		self.df['first_seasonal_diff'] = self.df.first_diff - self.df.first_diff.shift(12)
 		self.stationarity(self.df.first_seasonal_diff.dropna(inplace=False))
 

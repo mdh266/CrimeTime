@@ -33,7 +33,7 @@ class PreProcessor:
 		"""
 		Constructor will just create address and column names.
 		"""
-		## Column names for the database
+		## Column names for the dat oabase
 		self.address = "./data/NYPD_7_Major_Felony_Incident_Map.csv"
 		self.database_name = database_name
 

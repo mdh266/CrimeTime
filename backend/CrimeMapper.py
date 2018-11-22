@@ -102,7 +102,7 @@ class CrimeMapper:
 			used for describing where database is.
 
 		"""
-		## Boolean to know to run in production mode, changes location of database
+		# Boolean to know to run in production mode, changes location of database
 		self.production_mode = production_mode
 
 		## Geolocator object
@@ -143,7 +143,7 @@ class CrimeMapper:
 		## Dataframe that has all the hours in the day and the crimes occurring each hour
 		self.CRIME_HOURS   = None
 
-		## sql_query to 
+		# ## sql_query to 
 		self.sql_query	   = None
 
 		#
@@ -157,8 +157,23 @@ class CrimeMapper:
 
 		self.car_ts        = None
 
+	def set_address_precinct(self, address : str, precinct : int) -> None:
+		"""
+		Sets the andress and precinct instead of finding it.
 
-	def find_precinct(self, address):
+		:Parameters: address (str): 
+			The address contianing number, street and borough.
+
+		:Paramaters: precinct (int): The precinct
+
+		:returns: None
+		"""
+		self.prec_found = True
+		self.address    = address
+		self.prec       = precinct
+
+
+	def find_precinct(self, address : str) -> bool:
 		""" 
 		Takes in address and finds the police precint the address belongs to.
 
@@ -195,15 +210,15 @@ class CrimeMapper:
 			# find which precinct the address is in.
 			N = self.geo_df.shape[0]
 			for i in range(0,N):
-	 			if(point.within(self.geo_df.loc[i,'geometry'])):
- 					self.prec = int(self.geo_df.loc[i,'precinct'])
+				if(point.within(self.geo_df.loc[i,'geometry'])):
+					self.prec = int(self.geo_df.loc[i,'precinct'])
 					self.prec_found = True
 
 			if self.production_mode:
 				return self.prec_found
 	
 
-	def get_all_crime_data(self):
+	def get_all_crime_data(self) -> None:
 		"""
 		Get all the crime data for this police precinct (excluding rape 
 		and murder) by querying the SQLite database.
@@ -211,12 +226,12 @@ class CrimeMapper:
 		**NOTE:** find_precinct() must have been called first.
 		"""
 
-		self.sql_query = """SELECT * 
+		sql_query = """SELECT * 
 							FROM NYC_CRIME 
-							WHERE PRECINCT = %s AND 
+							WHERE PRECINCT = {prec} AND 
 								  OFFENSE != 'RAPE'AND 
 								  OFFENSE != 'MURDER & NON-NEGL. MANSLAUGHTER'
-						""" % str(self.prec)
+						""".format(prec=self.prec)
 
 		if self.production_mode == True:
 			conn = sqlite3.connect('./data/CrimeTime.db')
@@ -224,7 +239,7 @@ class CrimeMapper:
 			conn = sqlite3.connect('../data/CrimeTime.db')
 
 		# The crime dataframe for the selected police precint.
-		df = pd.read_sql_query(self.sql_query, conn)
+		df = pd.read_sql_query(sql_query, conn)
 		conn.close()
 
 		# Make the trend time series for all the different crimes
@@ -253,12 +268,11 @@ class CrimeMapper:
 		self.car_ts  = seasonal_decompose(self.ts,freq=12).trend
 		self.car_ts.dropna(inplace=True)
 
-	def get_crime_data(self, crime_name):
+
+	def get_crime_data(self, crime_name : str):
 		"""
 		Gets the crime data for the user supplied crime in the users 
 		police precinct from the SQLite database.
-
-		**NOTE:** find_precinct() must have been called first.
 
 		:Parameters: crime_name (str): 
 			The user selected crime. Accepts:
@@ -284,10 +298,10 @@ class CrimeMapper:
 			self.crime_name = 'GRAND LARCENY OF MOTOR VEHICLE'
 		else:
 			dont_continue = True
-			print "Cant Work With That Crime Type"
+			print("Cant Work With That Crime Type")
 
 		if(dont_continue == False):
-			self.sql_query = """
+			sql_query = """
 							SELECT * FROM 
 							NYC_CRIME 
 							WHERE PRECINCT = %s AND 
@@ -300,10 +314,10 @@ class CrimeMapper:
 				conn = sqlite3.connect('../data/CrimeTime.db')
 
 			# The crime dataframe for the selected police precint.
-			self.crime_df = pd.read_sql_query(self.sql_query, conn)
+			self.crime_df = pd.read_sql_query(sql_query, conn)
 			conn.close()
         
-	def restamp(self, row):
+	def restamp(self, row : str) -> datetime.date:
 		"""
 		Rewrite the date into an appropriate formate for pandas time series.
 		
@@ -318,7 +332,7 @@ class CrimeMapper:
 		"""
 		return datetime.strptime(row, '%m/%d/%Y %I:%M:%S %p').date()
     
-	def make_time_series(self):
+	def make_time_series(self) -> None:
 		""" 
 		Rewrites the self.crime_df into self.ts where the crimes have been resampled
 		for each month.
@@ -335,7 +349,7 @@ class CrimeMapper:
 		if(self.ts.isnull().values.any()):
 			self.ts.dropna(inplace=True)           
 
-	def percent_per_day(self):
+	def percent_per_day(self) -> None:
 		"""
 		Makes a Pandas DataFrame for the number of crimes that occurred in 
 		the selected precinct on each day of the week.
@@ -354,7 +368,7 @@ class CrimeMapper:
 			self.DAYS_OF_CRIME.loc[day] = CRIME_DAYS.loc[day]
     
         
-	def percent_per_hour(self):
+	def percent_per_hour(self) -> None:
 		""" 
 		Makes a Pandas DataFrame for the number of crimes that occurred in 
 		the selected precinct on hour of the day.
@@ -363,7 +377,7 @@ class CrimeMapper:
 		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
 		self.CRIME_HOURS = 100 * (self.CRIME_HOURS /self.CRIME_HOURS.sum())
 
-	def get_precinct(self):
+	def get_precinct(self) -> str:
 		"""
 		Returns the precinct of the address that was searched for.
 		
@@ -372,7 +386,7 @@ class CrimeMapper:
 		"""
 		return str(self.prec)
 
-	def get_address(self):
+	def get_address(self) -> str:
 		"""
 		Returns the address that was searched for.
 		
@@ -381,7 +395,7 @@ class CrimeMapper:
 		"""
 		return str(self.address)
 
-	def get_precinct_info(self):
+	def get_precinct_info(self) -> dict:
 		"""
 		This function will query the SQLite databse to obtain
 		the police precinct info for users precinct.
@@ -419,8 +433,8 @@ class CrimeMapper:
 		fig = plt.figure(figsize=(9, 5))
 		plt.clf()
 
-		decomp_crime = seasonal_decompose(self.ts,freq=12)
-		season_crime = decomp_crime.seasonal
+		decomp_crime  = seasonal_decompose(self.ts,freq=12)
+		season_crime  = decomp_crime.seasonal
 		trend_crime   = decomp_crime.trend
 		
 		title = """Decomposition Of Crimes Involving %s in Precinct %s 
@@ -446,12 +460,12 @@ class CrimeMapper:
 			str(self.prec) + ' by day of week' 
         
 		fig = plt.figure(figsize=(8, 5))
-  	      
- 		self.DAYS_OF_CRIME.plot(kind='bar')
+
+		self.DAYS_OF_CRIME.plot(kind='bar')
       
 		plt.title(title,fontsize=13)
 		plt.yticks(size=14)
- 		plt.xticks(rotation=30,size=14)
+		plt.xticks(rotation=30,size=14)
 		plt.ylabel('Percent of crimes', fontsize=13)
 
 	def plot_per_hour(self):
