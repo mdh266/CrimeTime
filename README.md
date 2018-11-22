@@ -1,6 +1,8 @@
 # CrimeTime
+---------------------
 
 ## Introduction 
+---------------------
 
 This web application was part of a 3 week project at <a href="http://insightdatascience.com/">Insight Data Science</a>.  I originally started this project because I was interested in developing a data driven approach to reducing crime in the NYC area.  Working on this project I quickly noticed that different neighborhoods are affected by different types of crime and these crimes peak at different times of the year (you can see this <a href="http://michael-harmon.com/blog/crimetime.html">blog post</a> to read more).  I thought if I could make a web application that forecasts monthly crime rates on a local level it might help police redistribute their resources more effectively and thus reduce the crime in NYC.  The applicaiton could also be of interest to individuals or business who are concerned about crime rates in their neighborhood.  
 
@@ -24,6 +26,7 @@ Users can also choose to forecast specific crime rates into the future.
 
 
 ## How It works
+---------------------
 
 This code was written using <a href="https://www.python.org/"> Python</a> and <a href="http://flask.pocoo.org/"> Flask</a>
 and deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a> Users are prompted to enter an address and then I use the <a href="https://pypi.python.org/pypi/geopy">geopy</a> library to get
@@ -45,8 +48,9 @@ I used a grid search to obtain the appropriate model paramaters with the selecti
 
 
 ## Dependencies
+---------------------
 
-1. Python 2.7
+1. Python 3.X
 2. SQLite
 3. StatsModels (0.8.0rc1)
 4. Pandas (0.19.1)
@@ -62,6 +66,7 @@ I used a grid search to obtain the appropriate model paramaters with the selecti
 14. pytest (only for testing)
 
 ## Running it on your own computer
+---------------------
 
 To run this web application on your computer make sure you have obtained or built the SQLite
 database and have all the dependencies installed on you computer.  You can install all the 
@@ -85,6 +90,7 @@ Enter the address http://0.0.0.0:5000/ into your web browser to use the web appl
 
 
 ## Building the database
+---------------------
 
 To build the database on your local machine first download the file "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data website and
 place it in the <code>CrimeTime/data/</code> directory. Then type
@@ -97,6 +103,7 @@ the folowing command into your terminal from the <code>CrimeTime/</code> directo
 
 
 ## Testing
+---------------------
 
 To test the code to make sure it works run the following command in your terminal shell from the <code>/CrimeTime/</code>directory:
 
@@ -105,6 +112,8 @@ To test the code to make sure it works run the following command in your termina
 You will then see a report on the testing results.
 
 ## Documentation
+---------------------
+
 To build the documentation for this code type the following command in terminal from <code>/CrimeTime/</code> directory:
 
 	sphinx-apidoc -F -o doc/ backend/
