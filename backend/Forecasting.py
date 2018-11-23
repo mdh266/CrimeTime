@@ -1,5 +1,3 @@
-from collections import Counter
-
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
@@ -7,15 +5,14 @@ import matplotlib.pyplot as plt
 
 import statsmodels.api as sm
 from statsmodels.tsa.stattools import adfuller
-import pandas as pd
 
+import pandas as pd
 import numpy as np
 
-#zzimport seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
 
-class Seasonal_ARIMA:
+class Seasonal_ARIMA (object):
 	"""
   	This class builds a seasonal based ARIMA model using 
 	`StatsModels <http://statsmodels.sourceforge.net/0.6.0/generated/statsmodels.tsa.arima_model.ARIMA.html>`_.
@@ -122,10 +119,10 @@ class Seasonal_ARIMA:
 		self.test_error = None
 
 		## Starting index for the training set
-		self._training_begin = 0
+		self._training_begin   = 0
 	
 		## Ending index for the training set
-		self._training_end   = 96
+		self._training_end     = 96
 
 		## Starting index for the validation set
 		self._validation_begin = 96
@@ -134,16 +131,16 @@ class Seasonal_ARIMA:
 		self._validation_end   = 108
 
 		## Starting index for the test set
-		self._test_begin	    = 108
+		self._test_begin	   = 108
 
 		## Starting index for the test set
-		self._test_end	    = 120
+		self._test_end	       = 120
 
 		## Starting index for the forecasting set
-		self._forecast_begin = 120
+		self._forecast_begin   = 120
 
 		## Starting index for the forecasting set
-		self._forecast_end   = 144
+		self._forecast_end     = 144
 			
 		## The training set time series data
 		self.training  =  pd.DataFrame(index=self.training_date_list,
@@ -165,7 +162,7 @@ class Seasonal_ARIMA:
 		self.test['Recorded'] = CT.ts[self._test_begin:self._test_end]
 
 
-	def stationarity(self, timeseries):
+	def stationarity(self, timeseries : pd.Series) -> None:
 		"""
 		Performs Dickey-Fuller test for stationarity and plots the results.
 
@@ -176,26 +173,26 @@ class Seasonal_ARIMA:
 		#http://www.seanabu.com/2016/03/22/time-series-seasonal-ARIMA-model-in-python/
 		#Determing rolling statistics
 		rolmean = timeseries.rolling(window=12,center=False).mean()
-		rolstd = timeseries.rolling(window=12,center=False).std()
+		rolstd  = timeseries.rolling(window=12,center=False).std()
 		
 		#Plot rolling statistics:
-		fig = plt.figure(figsize=(8, 6))
+		fig  = plt.figure(figsize=(8, 6))
 		orig = plt.plot(timeseries, color='blue',label='Original')
 		mean = plt.plot(rolmean, color='red', label='Rolling Mean')
-		std = plt.plot(rolstd, color='black', label = 'Rolling Std')
+		std  = plt.plot(rolstd, color='black', label = 'Rolling Std')
 		plt.legend(loc='best')
 		plt.title('Rolling Mean & Standard Deviation')
 		plt.show()
     
 		print('Results of Dickey-Fuller Test:')
-		dftest = adfuller(timeseries, autolag='AIC')
+		dftest   = adfuller(timeseries, autolag='AIC')
 		dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value',
 					'#Lags Used','Number of Observations Used'])
 		for key,value in dftest[4].items():
 			dfoutput['Critical Value (%s)'%key] = value
 		print(dfoutput)
 
-	def first_diff(self):
+	def first_diff(self) -> None:
 		"""
 		Obtains the first difference and performs Dickey-Fuller test for stationarity.
 		"""
@@ -203,7 +200,7 @@ class Seasonal_ARIMA:
 		self.df['first_diff'] = self.df.Crimes - self.df.Crimes.shift(1)
 		self.stationarity(self.df.first_diff.dropna(inplace=False))
 
-	def seasonal_first_diff(self):
+	def seasonal_first_diff(self) -> None:
 		"""
 		Obtains the first seasonal difference and performs Dickey-Fuller test for stationarity.
 		"""
@@ -211,7 +208,7 @@ class Seasonal_ARIMA:
 		self.df['first_seasonal_diff'] = self.df.first_diff - self.df.first_diff.shift(12)
 		self.stationarity(self.df.first_seasonal_diff.dropna(inplace=False))
 
-	def fit(self):
+	def fit(self) -> None:
 		"""
 		Run throught the different values ARIMA parameter values and fit the model
 		to the training set.  Collect the error of how it performs on the validation
@@ -237,7 +234,7 @@ class Seasonal_ARIMA:
                                       					enforce_invertibility=True,
                                       					enforce_stationarity=True)
 	
-							result = self.mod.fit(disp=False)
+							result   = self.mod.fit(disp=False)
 				
 		
 							self.validation['Predicted'] = result.predict(	
@@ -304,30 +301,30 @@ class Seasonal_ARIMA:
 		self.training['Recorded'][self._test_begin:self._test_end] = self.test['Recorded']
 
 
-	def forecast(self):
+	def forecast(self) -> None:
 		""" 
 		Forecasts the crime rates into 2016 and 2017.
 		"""
 
-		forecast = pd.DataFrame(index=self.forecast_date_list, 
-					 columns=self.training.columns)
+		forecast      = pd.DataFrame(index=self.forecast_date_list, 
+					                 columns=self.training.columns)
 
 		self.training = pd.concat([self.training, forecast])
 
-		self.mod = sm.tsa.SARIMAX(self.training['Recorded'], 
-                              		order=(self._p,self._d,self._q),
-                              		seasonal_order=(self._P,self._D,self._Q,12),
-                            		enforce_invertibility=True,
-                              		enforce_stationarity=False)
+		self.mod      = sm.tsa.SARIMAX(self.training['Recorded'], 
+                              		   order=(self._p,self._d,self._q),
+                              		   seasonal_order=(self._P,self._D,self._Q,12),
+                            		   enforce_invertibility=True,
+                              	       enforce_stationarity=False)
 
 
-		self.results = self.mod.fit(disp=False)
+		self.results  = self.mod.fit(disp=False)
 
-		self.forecast_results = self.results.predict(start = self._forecast_begin,
-                                        		    end = self._forecast_end, 
-                                      			    dynamic= True)
+		self.forecast_results = self.results.predict(start   = self._forecast_begin,
+                                        		     end     = self._forecast_end, 
+                                      			     dynamic = True)
 		
-	def plot_test(self):
+	def plot_test(self) -> None:
 		"""
 		Plots the predicted and recorded crime values on the test set.
 		"""	
@@ -336,7 +333,7 @@ class Seasonal_ARIMA:
 		plt.xlabel('Year')  
 	
 
-	def plot_forecast(self):
+	def plot_forecast(self) -> None:
 		"""
 		Plots the predicted and recorded crime values on the test set.
 		"""

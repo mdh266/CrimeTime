@@ -7,10 +7,9 @@ import urllib2
 
 import sys
 import os.path
-import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
 
-class PreProcessor:
+class PreProcessor (object):
 	"""
 	The PreProcessor class reates a SQLite database for crimes in New York City.  
 	It will read in the data from the CSV file, clean it and store it to disk.
@@ -18,6 +17,8 @@ class PreProcessor:
 	using `beautifulsoup <https://pypi.python.org/pypi/beautifulsoup4>`_ and get each 
 	police precinct's name, address and telephone numeber, it will also stored this to disk
 	in the same database.
+
+	Note:  This was originally done in Python 2.7 and has not been adapted for 3.X
 
 	:attributes:
 		**address** (str):

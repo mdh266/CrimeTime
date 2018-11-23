@@ -3,7 +3,7 @@
 from tornado.wsgi import WSGIContainer
 from tornado.ioloop import IOLoop
 from tornado.web import FallbackHandler, RequestHandler, Application
-from frontend import app
+from flaskapp import app
 
 class MainHandler(RequestHandler):
  def get(self):

@@ -6,26 +6,17 @@ from dateutil.relativedelta import relativedelta
 import sqlite3
 import pandas as pd
 
-from geopy.geocoders import Nominatim
-from geopy.distance import great_circle
-
-import geopandas as gpd 
-from shapely.geometry import Point
-
-from shapely.geometry import Point, MultiPoint, MultiPolygon
-from descartes import PolygonPatch
-import matplotlib.pyplot as plt
-
+from shapely.geometry import MultiPolygon
 
 from statsmodels.tsa.seasonal import seasonal_decompose
-import sys
-import os.path
-import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/..")
+
 import warnings
 warnings.filterwarnings('ignore')
 
-class CrimeMapper:
+from PrecinctFinder import PrecinctFinder
+import matplotlib.pyplot as plt
+
+class CrimeMapper (object):
 	"""
 	This is the main class for CrimeTime. It will deal with all the backend
 	data management and interacting with the SQLite database.
@@ -40,22 +31,6 @@ class CrimeMapper:
 			Boolean to describe if code is running in production mode. Will be
 			used for describing where database is.
 
-		**geo_df** (`GeoPandas DataFrame <http://geopandas.org/data_structures.html#geodataframe>`_):
-			The GeoPandas DataFrame of the geojson file, to plot the NYPD Precincts.
-
-		**prec_found** (boolean):
-			Boolean to record if the police precinct of the user entered address has been found.
-		
-		**location** (dict):
-			Dictionary returned by `geopy <https://pypi.python.org/pypi/geopy/1.11.0>`_
-			of the address, lattitude and longitude.
-
-		**address** (str): 
-			Address returned by `geopy <https://pypi.python.org/pypi/geopy/1.11.0>`_ .
-
-		**prec** (int):
-			Police precinct of the address.
-		
 		**crime_name** (str):
 			The name of the crime, i.e., 'Larceny', 'Assault', etc.
 
@@ -84,15 +59,12 @@ class CrimeMapper:
 		**larceny ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
 			The Pandas DataFrame that will have the monlthy trends in the larceny.
 
-		**car_ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
-			The Pandas DataFrame that will have the monlthy trends in the car theft.
-
 		**robbery_ts** (`Pandas DataFrame <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_):
 			The Pandas DataFrame that will have the monlthy trends in the robbery.
 	:methods:
 	"""    
     
-	def __init__(self, production_mode):
+	def __init__(self, production_mode : bool):
 		"""
 		Constructor just makes a GeoPandas <http://geopandas.org/data_structures.html#geodataframe>`_)
 		based off the police precincts in the /data/ directory.
@@ -104,29 +76,6 @@ class CrimeMapper:
 		"""
 		# Boolean to know to run in production mode, changes location of database
 		self.production_mode = production_mode
-
-		## Geolocator object
-		self._geolocator = Nominatim()
-	
-		## Police precinct geopandas dataframe
-		self.geo_df = None
-
-		if self.production_mode == True:
-			self.geo_df = gpd.read_file("./data/NYC_Police_Precincts.geojson")
-		else:
-			self.geo_df = gpd.read_file("../data/NYC_Police_Precincts.geojson")
-		
-		## boolean as to whether the precinct was found in the find_precinct call
-		self.prec_found    = None
-
-		## The location dictionary returned by geopy
-		self.location      = None
-
-		## Address of the location from geopy
-		self.address       = None 
-
-		## Precinct of the address
-		self.prec		   = None
 		
 		## The name crime the user input
 		self.crime_name    = None
@@ -146,7 +95,7 @@ class CrimeMapper:
 		# ## sql_query to 
 		self.sql_query	   = None
 
-		#
+		# individual crime series
 		self.assault_ts    = None
 
 		self.larceny_ts    = None
@@ -157,20 +106,7 @@ class CrimeMapper:
 
 		self.car_ts        = None
 
-	def set_address_precinct(self, address : str, precinct : int) -> None:
-		"""
-		Sets the andress and precinct instead of finding it.
-
-		:Parameters: address (str): 
-			The address contianing number, street and borough.
-
-		:Paramaters: precinct (int): The precinct
-
-		:returns: None
-		"""
-		self.prec_found = True
-		self.address    = address
-		self.prec       = precinct
+		self.precinct_helper = PrecinctFinder(production_mode)
 
 
 	def find_precinct(self, address : str) -> bool:
@@ -186,36 +122,13 @@ class CrimeMapper:
 		:rtype: 
 			Boolean.
 		"""
+		return self.precinct_helper.find_precinct(address)
 
-		## Boolean of whether the precinct of address is found	
-		self.prec_found = False
-		## location of the address
-		try:
-			self.location = self._geolocator.geocode(address)
-		except:
-			pass
-		
-		if(self.location == None):
-			return self.prec_found
-		else:
-			self.address = self.location.address
-	
-			# Get the longitude and latitude of the address
-			point =  Point(self.location.longitude, self.location.latitude)
-
-			# Central coordinates for NYC
-			self.nyc_coor = [40.7128,-74.0059]
-
- 			# Loop through all the NYC precincts geometries and
-			# find which precinct the address is in.
-			N = self.geo_df.shape[0]
-			for i in range(0,N):
-				if(point.within(self.geo_df.loc[i,'geometry'])):
-					self.prec = int(self.geo_df.loc[i,'precinct'])
-					self.prec_found = True
-
-			if self.production_mode:
-				return self.prec_found
+	def get_precinct_shape(self) ->  MultiPolygon:
+		"""
+		Returns the MuliPolygon for the precinct that was found.
+		"""
+		return self.precinct_helper.get_precinct_shape()
 	
 
 	def get_all_crime_data(self) -> None:
@@ -229,9 +142,10 @@ class CrimeMapper:
 		sql_query = """SELECT * 
 							FROM NYC_CRIME 
 							WHERE PRECINCT = {prec} AND 
-								  OFFENSE != 'RAPE'AND 
-								  OFFENSE != 'MURDER & NON-NEGL. MANSLAUGHTER'
-						""".format(prec=self.prec)
+								  OFFENSE NOT IN ('RAPE',
+								  				  'MURDER & NON-NEGL. MANSLAUGHTER',
+								  				  'GRAND LARCENY OF MOTOR VEHICLE')
+						""".format(prec=self.get_precinct())
 
 		if self.production_mode == True:
 			conn = sqlite3.connect('./data/CrimeTime.db')
@@ -263,10 +177,35 @@ class CrimeMapper:
 		self.burglary_ts  = seasonal_decompose(self.ts,freq=12).trend
 		self.burglary_ts.dropna(inplace=True)
 
-		self.crime_df = df[df.OFFENSE == 'GRAND LARCENY OF MOTOR VEHICLE'] 
-		self.make_time_series()
-		self.car_ts  = seasonal_decompose(self.ts,freq=12).trend
-		self.car_ts.dropna(inplace=True)
+
+	def get_precinct_info(self) -> dict:
+		"""
+		This function will query the SQLite databse to obtain
+		the police precinct info for users precinct.
+
+		:returns: precinct's name, address and telephone number.
+		:rtype: dict
+		"""
+		sql_query = """SELECT Name, Address, Telephone
+					   FROM NYC_Precint_Info 
+					   WHERE Precinct = {prec}
+					""".format(prec = self.get_precinct())
+
+		if self.production_mode == True:		
+			conn = sqlite3.connect('./data/CrimeTime.db')
+		else:
+			conn = sqlite3.connect('../data/CrimeTime.db')
+
+		df = pd.read_sql_query(sql_query, conn)
+		conn.close()
+	
+		precinct_info = {}
+
+		precinct_info['name']    = str(df['Name'][0])
+		precinct_info['address'] = str(df['Address'][0])
+		precinct_info['tele']    = str(df['Telephone'][0])
+
+		return precinct_info
 
 
 	def get_crime_data(self, crime_name : str):
@@ -281,10 +220,9 @@ class CrimeMapper:
 			* 'Robbery'
 			* 'Assault' 
 			* 'Burglary'
-			* 'Car Theft'
 		"""
 		self.crime_name = crime_name
-		dont_continue = False
+		dont_continue   = False
 
 		if(crime_name == 'Larceny'):
 			self.crime_name = 'GRAND LARCENY'
@@ -294,19 +232,19 @@ class CrimeMapper:
 			self.crime_name = 'FELONY ASSAULT'
 		elif(crime_name == 'Burglary'):
 			self.crime_name = 'BURGLARY'
-		elif(crime_name == 'Car Theft'):
-			self.crime_name = 'GRAND LARCENY OF MOTOR VEHICLE'
+		# elif(crime_name == 'Car Theft'):
+		# 	self.crime_name = 'GRAND LARCENY OF MOTOR VEHICLE'
 		else:
 			dont_continue = True
 			print("Cant Work With That Crime Type")
 
 		if(dont_continue == False):
-			sql_query = """
-							SELECT * FROM 
+			sql_query = """ SELECT * FROM 
 							NYC_CRIME 
-							WHERE PRECINCT = %s AND 
-								  OFFENSE = '%s'
-							""" % (str(self.prec), str(self.crime_name))
+							WHERE PRECINCT = {prec} AND 
+								  OFFENSE = '{crime_name}'
+							""".format(prec       = self.get_precinct(), 
+							           crime_name = self.crime_name)
 
 			if self.production_mode == True:
 				conn = sqlite3.connect('./data/CrimeTime.db')
@@ -337,15 +275,15 @@ class CrimeMapper:
 		Rewrites the self.crime_df into self.ts where the crimes have been resampled
 		for each month.
 		"""
-		aux = self.crime_df['DATE'].apply(self.restamp)
+		aux  = self.crime_df['DATE'].apply(self.restamp)
 		temp = pd.Series(Counter(aux))
 		## The pandas time series of the monthly number of specified crimes in precinct
-		self.ts = temp.to_frame()
+		self.ts         = temp.to_frame()
 		self.ts.reset_index(inplace=True)
 		self.ts.columns = ['Date','Crimes']
 		self.ts['Date'] = pd.to_datetime(self.ts['Date'])
-		self.ts = self.ts.set_index('Date')
-		self.ts = self.ts.resample('M').sum()
+		self.ts         = self.ts.set_index('Date')
+		self.ts         = self.ts.resample('M').sum()
 		if(self.ts.isnull().values.any()):
 			self.ts.dropna(inplace=True)           
 
@@ -374,8 +312,8 @@ class CrimeMapper:
 		the selected precinct on hour of the day.
 		"""
 		self.crime_df['HOUR'] = self.crime_df['HOUR'].astype(int)
-		self.CRIME_HOURS =  self.crime_df.groupby('HOUR').size() #\
-		self.CRIME_HOURS = 100 * (self.CRIME_HOURS /self.CRIME_HOURS.sum())
+		self.CRIME_HOURS      =  self.crime_df.groupby('HOUR').size() #\
+		self.CRIME_HOURS      = 100 * (self.CRIME_HOURS / self.CRIME_HOURS.sum())
 
 	def get_precinct(self) -> str:
 		"""
@@ -384,7 +322,7 @@ class CrimeMapper:
 		:returns: prec
 		:rtype: int
 		"""
-		return str(self.prec)
+		return self.precinct_helper.get_precinct()
 
 	def get_address(self) -> str:
 		"""
@@ -393,36 +331,7 @@ class CrimeMapper:
 		:returns: address
 		:rtype: str
 		"""
-		return str(self.address)
-
-	def get_precinct_info(self) -> dict:
-		"""
-		This function will query the SQLite databse to obtain
-		the police precinct info for users precinct.
-
-		:returns: precinct's name, address and telephone number.
-		:rtype: dict
-		"""
-		sql_query = """SELECT * 
-					   FROM NYC_Precint_Info 
-					   WHERE Precinct=%s
-					""" % str(self.prec)
-
-		if self.production_mode == True:		
-			conn = sqlite3.connect('./data/CrimeTime.db')
-		else:
-			conn = sqlite3.connect('../data/CrimeTime.db')
-
-		df = pd.read_sql_query(sql_query, conn)
-		conn.close()
-	
-		precinct_info = {}
-
-		precinct_info['name'] = str(df['Name'][0])
-		precinct_info['address'] = str(df['Address'][0])
-		precinct_info['tele'] = str(df['Telephone'][0])
-
-		return precinct_info
+		return self.precinct_helper.get_address()
 
 	def plot_decompose(self):
 		"""
@@ -438,7 +347,7 @@ class CrimeMapper:
 		trend_crime   = decomp_crime.trend
 		
 		title = """Decomposition Of Crimes Involving %s in Precinct %s 
-				""" %  (str(self.crime_name),str(self.prec))
+				""" %  (str(self.crime_name),str(self.get_precinct()))
 
 		plt.plot(self.ts, label='Monthly data', linewidth=3)
 		plt.plot(season_crime, label='Seasonality', linewidth=3)
@@ -446,42 +355,3 @@ class CrimeMapper:
 		plt.title(title,fontsize=13)
 		plt.xlabel('Year', fontsize=13)
 		plt.legend()
-
-
-	def plot_per_day(self):
-		"""
-		Makes a bar plot of percent of crimes which occur during each day in the week.
-		"""
-		plt.clf()
-		self.percent_per_day()
-		
-		title = 'Percentage of ' +\
-			self.crime_name +' in Precinct ' +\
-			str(self.prec) + ' by day of week' 
-        
-		fig = plt.figure(figsize=(8, 5))
-
-		self.DAYS_OF_CRIME.plot(kind='bar')
-      
-		plt.title(title,fontsize=13)
-		plt.yticks(size=14)
-		plt.xticks(rotation=30,size=14)
-		plt.ylabel('Percent of crimes', fontsize=13)
-
-	def plot_per_hour(self):
-		"""
-		Makes a bar plot of percent of crimes which occur during each day in the week.
-		"""
-		plt.clf()
-		self.percent_per_hour()
-		title = 'Percentage of ' + self.crime_name +\
-			' in Precinct ' + str(self.prec) +\
-			' by time of day' 
-
-		fig = plt.figure(figsize=(8, 5))
-		self.CRIME_HOURS.plot(kind='bar')
-		plt.title(title,fontsize=13)
-		plt.yticks(size=14)
-		plt.xticks(rotation=45,size=16)
-		plt.xlabel('Hour In Day', fontsize=13)
-		plt.ylabel('Pecent of crimes', fontsize=13)
