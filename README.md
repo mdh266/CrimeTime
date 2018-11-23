@@ -47,23 +47,6 @@ model through the Python library <a href="http://statsmodels.sourceforge.net/"> 
 I used a grid search to obtain the appropriate model paramaters with the selection criteria that the choice of parameters must minimize the validation error.
 
 
-## Dependencies
----------------------
-
-1. Python 3.X
-2. SQLite
-3. StatsModels (0.8.0rc1)
-4. Pandas (0.19.1)
-5. GeoPandas (0.2.1)
-6. Geopy (1.11.0)
-7. Shapely (1.5.17)
-8. Flask (0.11.1)
-9. Basemap (1.0.7)
-10. Matplotlib (1.5.3)
-11. Numpy (1.11.2)
-12. Beautifulsoup4 (4.5.3)
-13. Sphinx (only to build documentation)
-14. pytest (only for testing)
 
 ## Running it on your own computer
 ---------------------
