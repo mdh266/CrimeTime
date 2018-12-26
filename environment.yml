@@ -180,5 +180,5 @@ dependencies:
     - folium==0.7.0
     - geographiclib==1.49
     - geopy==1.17.0
-prefix: /Users/mukeharmon/miniconda/envs/crimetime_env
+prefix: ~/miniconda/envs/crimetime_env
 
