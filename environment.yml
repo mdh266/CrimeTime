@@ -3,12 +3,6 @@ channels:
   - anaconda
   - defaults
 dependencies:
-  - cloog=0.18.0=0
-  - gcc=4.8.5=8
-  - gmp=6.1.2=hb37e062_1
-  - isl=0.12.2=1
-  - mpc=1.1.0=h6ef4df4_1
-  - mpfr=4.0.1=h3018a27_3
   - alabaster=0.7.12=py37_0
   - anaconda=custom=py37_0
   - appnope=0.1.0=py37_0
@@ -19,7 +13,6 @@ dependencies:
   - backcall=0.1.0=py37_0
   - beautifulsoup4=4.6.3=py37_0
   - blas=1.0=mkl
-  - bleach=3.0.2=py37_0
   - bzip2=1.0.6=h1de35cc_5
   - ca-certificates=2018.03.07=0
   - cairo=1.14.12=hc4e6be7_4
@@ -29,6 +22,7 @@ dependencies:
   - click=7.0=py37_0
   - click-plugins=1.0.4=py37_0
   - cligj=0.5.0=py37_0
+  - cloog=0.18.0=0
   - cryptography=2.3.1=py37hdbc3d79_0
   - curl=7.61.1=ha441bb4_0
   - cycler=0.10.0=py37_0
@@ -43,12 +37,14 @@ dependencies:
   - fontconfig=2.13.0=h5d5b041_1
   - freetype=2.9.1=hb4e5f40_0
   - freexl=1.0.5=h1de35cc_0
+  - gcc=4.8.5=8
   - gdal=2.2.4=py37h6440ff4_1
   - geopandas=0.3.0=py37_0
   - geos=3.6.2=h5470d99_2
   - gettext=0.19.8.1=h15daf44_3
   - giflib=5.1.4=h1de35cc_1
   - glib=2.56.2=hd9629dc_0
+  - gmp=6.1.2=hb37e062_1
   - hdf4=4.2.13=h39711bb_2
   - hdf5=1.10.2=hfa1e0ec_1
   - icu=58.2=h4b95b61_1
@@ -59,6 +55,7 @@ dependencies:
   - ipython=7.1.1=py37h39e3cac_0
   - ipython_genutils=0.2.0=py37_0
   - ipywidgets=7.4.2=py37_0
+  - isl=0.12.2=1
   - itsdangerous=1.1.0=py37_0
   - jedi=0.13.1=py37_0
   - jinja2=2.10=py37_0
@@ -100,6 +97,8 @@ dependencies:
   - mkl_fft=1.0.6=py37hb8a8100_0
   - mkl_random=1.0.1=py37h5d10147_1
   - more-itertools=4.3.0=py37_0
+  - mpc=1.1.0=h6ef4df4_1
+  - mpfr=4.0.1=h3018a27_3
   - munch=2.3.2=py37_0
   - nbconvert=5.3.1=py37_0
   - nbformat=4.4.0=py37_0
@@ -175,10 +174,5 @@ dependencies:
   - xz=5.2.4=h1de35cc_4
   - zeromq=4.2.5=h0a44026_1
   - zlib=1.2.11=h1de35cc_3
-  - pip:
-    - branca==0.3.1
-    - folium==0.7.0
-    - geographiclib==1.49
-    - geopy==1.17.0
-prefix: ~/miniconda/envs/crimetime_env
+prefix: /Users/mukeharmon/miniconda/envs/crimetime_env
 
