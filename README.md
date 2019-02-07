@@ -28,6 +28,9 @@ Users can also choose to forecast specific crime rates into the future.
 ## How It works
 ---------------------
 
+**The source code can be found <a href="https://github.com/mdh266/CrimeTime">here</a>.**
+
+
 This code was written using <a href="https://www.python.org/"> Python</a> and <a href="http://flask.pocoo.org/"> Flask</a>
 and deployed to <a href="https://aws.amazon.com/"> Amazon web services.</a> Users are prompted to enter an address and then I use the <a href="https://pypi.python.org/pypi/geopy">geopy</a> library to get
 the latitude and longitude of the address.  Once that latitude and longitude are known I 
@@ -47,37 +50,33 @@ model through the Python library <a href="http://statsmodels.sourceforge.net/"> 
 I used a grid search to obtain the appropriate model paramaters with the selection criteria that the choice of parameters must minimize the validation error.
 
 
-
 ## Running it on your own computer
 ---------------------
 
-To run this web application on your computer make sure you have obtained or built the SQLite
-database and have all the dependencies installed on you computer.  You can install all the 
-dependencies using <a href="https://pip.pypa.io/en/stable/">pip</a> (except for python, Sphinx, Basemap and Statsmodels) by typing the following command from the 
-<code>CrimeTime/</code> directory:
+To run this web application on your computer, please email me to obtain the SQLite
+database and install all the necessary dependencies on you computer.  You can install all the depencies using <a href="https://www.docker.com/"> by running the following commands from the <code>CrimeTime/</code> directory:
 
-<code> pip install -r requirements.txt</code>
+<code>docker build -t crimetime . </code>
 
-To install Basemap (1.0.7) and StatsModels (0.8.0rc1) use the <a href="https://www.continuum.io/anaconda-overview">Anaconda</a> distribution.
+You can then run the application with the command,
 
+<code>docker run -id p 5000:5000 crimetime</code>
 
-Then run the command in the <code>CrimeTime/</code> directory:
+Then enter the address http://0.0.0.0:5000/ into your web browser to use the web application.
 
-	python run.py	
+Alternatively you can use the  <a href="https://www.continuum.io/anaconda-overview">Anaconda</a> distribution and create an virtual environment using the <code>environment.yml</code> file as described <a href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file">here</a>.  And then run the following command from the <code>CrimeTime/</code> directory:
 
-You should see something like:
+<code>python tornadoapp.py</code>
 
-	Running on http://0.0.0.0:5000/ (Press CTRL+C to quit)	
+and go to the address http://0.0.0.0:5000/ in your web browser.
 
-Enter the address http://0.0.0.0:5000/ into your web browser to use the web application.
 
 
 ## Building the database
 ---------------------
 
 To build the database on your local machine first download the file "NYPD_7_Major_Felony_Incident_Map.csv" from the NYC Open Data website and
-place it in the <code>CrimeTime/data/</code> directory. Then type
-the folowing command into your terminal from the <code>CrimeTime/</code> directory,
+place it in the <code>CrimeTime/data/</code> directory. Then making sure you have all the necessary dependencies installed on your computer (see above) and type the folowing command into your terminal from the <code>CrimeTime/</code> directory,
 
 	python ./backend/PreProcessor.py	
 
