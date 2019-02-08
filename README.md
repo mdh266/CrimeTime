@@ -54,19 +54,19 @@ I used a grid search to obtain the appropriate model paramaters with the selecti
 ---------------------
 
 To run this web application on your computer, please email me to obtain the SQLite
-database and install all the necessary dependencies on you computer.  You can install all the depencies using <a href="https://www.docker.com/"> by running the following commands from the <code>CrimeTime/</code> directory:
+database and install all the necessary dependencies on you computer.  You can install all the depencies using <a href="https://www.docker.com/">Docker</a> by running the following commands from the <code>CrimeTime/</code> directory:
 
-<code>docker build -t crimetime . </code>
+	docker build -t crimetime . 
 
 You can then run the application with the command,
 
-<code>docker run -id p 5000:5000 crimetime</code>
+	docker run -id p 5000:5000 crimetime
 
 Then enter the address http://0.0.0.0:5000/ into your web browser to use the web application.
 
 Alternatively you can use the  <a href="https://www.continuum.io/anaconda-overview">Anaconda</a> distribution and create an virtual environment using the <code>environment.yml</code> file as described <a href="https://conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file">here</a>.  And then run the following command from the <code>CrimeTime/</code> directory:
 
-<code>python tornadoapp.py</code>
+	python tornadoapp.py
 
 and go to the address http://0.0.0.0:5000/ in your web browser.
 
