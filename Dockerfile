@@ -6,9 +6,9 @@ RUN apt-get update && apt-get install vim htop -y
 
 # create directories
 RUN mkdir /ds \
-		  /ds/backend \
-		  /ds/flaskapp \
-		  /ds/data 
+          /ds/backend \
+          /ds/flaskapp \
+          /ds/data 
  
 
 ENV HOME=/ds
@@ -17,9 +17,9 @@ WORKDIR /ds
 
 # allows to add data & files into directories
 VOLUME /ds \
-	   /ds/backend \
-	   /ds/flaskapp \
-	   /ds/data
+       /ds/backend \
+       /ds/flaskapp \
+       /ds/data
 
 
 # copy data and files into directories
